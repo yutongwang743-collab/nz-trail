@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Destination {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  region      String   // "南岛" | "北岛"
+  coordinates String   // "lat,lng"
+  coverImage  String
+  description String
+  type           String   // "city" | "natural_attraction" | "activity_spot"
+  practicalInfo  String   @default("{}")  // JSON
+  createdAt      DateTime @default(now())
+
+  routeDestinations RouteDestination[]
+}
+
+model Route {
+  id           Int      @id @default(autoincrement())
+  title        String
+  slug         String   @unique
+  region       String   // "南岛" | "北岛" | "跨岛"
+  coverImage   String
+  description  String
+  bestSeason   String   // JSON array: ["summer","autumn","winter","spring"]
+  typeTags     String   // JSON array: ["自驾公路","极限运动",...]
+  featuredOrder Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  variants   RouteVariant[]
+  posts      Post[]
+  destinations RouteDestination[]
+}
+
+model RouteDestination {
+  id            Int         @id @default(autoincrement())
+  routeId       Int
+  route         Route       @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  destinationId Int
+  destination   Destination @relation(fields: [destinationId], references: [id])
+  dayIndex      Int
+
+  @@unique([routeId, destinationId, dayIndex])
+}
+
+model RouteVariant {
+  id            Int      @id @default(autoincrement())
+  routeId       Int
+  route         Route    @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  duration      String   // "3-5天" | "7-10天" | "10-14天"
+  budgetLevel   String   // "穷游" | "舒适" | "奢华"
+  itinerary     String   // JSON: [{day, locations[], activities[], transport, meals, accommodation, costBreakdown: {住宿,交通,餐饮,门票,活动}}]
+  totalBudgetMin Int
+  totalBudgetMax Int
+  createdAt     DateTime @default(now())
+
+  @@unique([routeId, duration, budgetLevel])
+}
+
+model Post {
+  id              Int      @id @default(autoincrement())
+  sourcePlatform  String   // "小红书" | "抖音" | "Instagram"
+  sourceUrl       String   @unique
+  authorName      String
+  authorAvatar    String
+  title           String
+  rawContent      String
+  aiSummary       String   // JSON
+  screenshots     String   // JSON array of image URLs
+  routeId         Int?
+  route           Route?   @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  likes           Int      @default(0)
+  saves           Int      @default(0)
+  comments        Int      @default(0)
+  status          String   @default("auto_published") // "auto_published" | "flagged" | "deleted"
+  sourcePublishedAt DateTime
+  crawledAt       DateTime @default(now())
+  createdAt       DateTime @default(now())
+}

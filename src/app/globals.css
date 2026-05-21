@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design Tokens: Primitive Layer ── */
+@layer base {
+  :root {
+    --color-primary: #0EA5E9;
+    --color-primary-hover: #0284C7;
+    --color-secondary: #38BDF8;
+    --color-accent: #EA580C;
+    --color-accent-hover: #C2410C;
+    --color-background: #F0F9FF;
+    --color-foreground: #0C4A6E;
+    --color-muted: #E8F2F8;
+    --color-border: #BAE6FD;
+    --color-destructive: #DC2626;
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    @apply bg-surface-bg text-surface-fg antialiased;
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* ── Semantic Tokens ── */
+@layer components {
+  .btn-primary {
+    @apply bg-brand-500 text-white hover:bg-brand-600 active:bg-brand-700
+           rounded-xl px-4 py-2.5 text-sm font-medium
+           transition-all duration-200
+           focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-accent {
+    @apply bg-accent-500 text-white hover:bg-accent-600 active:bg-accent-700
+           rounded-xl px-4 py-2.5 text-sm font-medium
+           transition-all duration-200
+           focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .card {
+    @apply rounded-2xl overflow-hidden bg-white border border-surface-border shadow-soft;
+  }
+
+  .card-soft {
+    @apply rounded-2xl overflow-hidden
+           bg-white border border-surface-border
+           shadow-soft hover:shadow-soft-lg
+           transition-all duration-200;
+  }
+
+  .card-interactive {
+    @apply card-soft cursor-pointer
+           hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99]
+           focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500;
+  }
+}
+
+/* ── MapLibre overrides ── */
+.maplibregl-popup-content {
+  border-radius: 0.75rem !important;
+  padding: 0 !important;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12) !important;
+}
+
+.maplibregl-popup-close-button {
+  font-size: 18px;
+  padding: 4px 8px;
+  color: #666;
+}
+
+/* ── Safe area for mobile bottom nav ── */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
