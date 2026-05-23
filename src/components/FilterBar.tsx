@@ -1,6 +1,29 @@
 'use client'
 
-import { TYPE_TAG_OPTIONS, SEASON_OPTIONS, DURATION_OPTIONS, SEASON_LABELS, type FilterState } from '@/lib/types'
+import type { FilterState, TravelStyle } from '@/lib/types'
+
+interface StyleOption {
+  value: TravelStyle | null
+  icon: string
+  label: string
+}
+
+const STYLE_OPTIONS: StyleOption[] = [
+  { value: null, icon: '🌿', label: '全部' },
+  { value: '徒步', icon: '🏔️', label: '徒步' },
+  { value: '慢旅行', icon: '😌', label: '慢旅行' },
+  { value: '公路自驾', icon: '🚗', label: '公路' },
+  { value: '穷游', icon: '💰', label: '穷游' },
+  { value: '冒险', icon: '🪂', label: '冒险' },
+  { value: '人文打卡', icon: '🎬', label: '人文' },
+]
+
+const DURATION_OPTIONS = [
+  { value: null, label: '不限' },
+  { value: '3-5天' as const, label: '3-5天' },
+  { value: '7-10天' as const, label: '7-10天' },
+  { value: '10-14天' as const, label: '10-14天' },
+]
 
 interface FilterBarProps {
   filters: FilterState
@@ -8,81 +31,49 @@ interface FilterBarProps {
 }
 
 export default function FilterBar({ filters, onChange }: FilterBarProps) {
-  function toggle(arr: string[], val: string): string[] {
-    return arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val]
-  }
-
   return (
-    <div className="space-y-3 px-4 py-4 bg-gray-50 rounded-2xl">
-      {/* 体验类型 */}
-      <div>
-        <div className="text-xs font-medium text-gray-500 mb-2">体验类型</div>
-        <div className="flex flex-wrap gap-2">
-          {TYPE_TAG_OPTIONS.map(tag => (
+    <div className="space-y-3">
+      {/* Row 1: Travel style — single select */}
+      <div className="flex flex-wrap gap-2">
+        {STYLE_OPTIONS.map(opt => {
+          const isActive = filters.style === opt.value
+          return (
             <button
-              key={tag}
-              onClick={() => onChange({ ...filters, typeTags: toggle(filters.typeTags, tag) })}
-              className={`px-3 py-1.5 rounded-full text-sm transition ${
-                filters.typeTags.includes(tag)
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-400'
+              key={opt.value ?? '__all__'}
+              onClick={() => onChange({ ...filters, style: isActive ? null : opt.value })}
+              className={`px-3.5 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                isActive
+                  ? 'bg-gray-900 text-white shadow-md shadow-gray-900/20 scale-105'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:bg-gray-50'
               }`}
             >
-              {tag}
+              <span className="mr-1">{opt.icon}</span>
+              {opt.label}
             </button>
-          ))}
-        </div>
+          )
+        })}
       </div>
 
-      {/* 季节 */}
-      <div>
-        <div className="text-xs font-medium text-gray-500 mb-2">适合季节</div>
-        <div className="flex flex-wrap gap-2">
-          {SEASON_OPTIONS.map(season => (
+      {/* Row 2: Duration — single select */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-gray-400 mr-1">时长</span>
+        {DURATION_OPTIONS.map(opt => {
+          const isActive = filters.duration === opt.value
+          return (
             <button
-              key={season}
-              onClick={() => onChange({ ...filters, seasons: toggle(filters.seasons, season) })}
-              className={`px-3 py-1.5 rounded-full text-sm transition ${
-                filters.seasons.includes(season)
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-400'
+              key={opt.value ?? '__all__'}
+              onClick={() => onChange({ ...filters, duration: opt.value })}
+              className={`px-3 py-1.5 rounded-full text-sm transition-all duration-200 ${
+                isActive
+                  ? 'bg-brand-500 text-white shadow-md shadow-brand-500/20'
+                  : 'bg-white text-gray-500 border border-gray-200 hover:border-brand-300 hover:text-brand-600'
               }`}
             >
-              {SEASON_LABELS[season]}
+              {opt.label}
             </button>
-          ))}
-        </div>
+          )
+        })}
       </div>
-
-      {/* 天数 */}
-      <div>
-        <div className="text-xs font-medium text-gray-500 mb-2">行程天数</div>
-        <div className="flex flex-wrap gap-2">
-          {DURATION_OPTIONS.map(dur => (
-            <button
-              key={dur}
-              onClick={() => onChange({ ...filters, durations: toggle(filters.durations, dur) })}
-              className={`px-3 py-1.5 rounded-full text-sm transition ${
-                filters.durations.includes(dur)
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-400'
-              }`}
-            >
-              {dur}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 重置 */}
-      {(filters.typeTags.length > 0 || filters.seasons.length > 0 || filters.durations.length > 0) && (
-        <button
-          onClick={() => onChange({ typeTags: [], seasons: [], durations: [] })}
-          className="text-sm text-red-500 hover:text-red-700"
-        >
-          清除筛选
-        </button>
-      )}
     </div>
   )
 }

@@ -4,6 +4,7 @@ import MapTimeline from '@/components/MapTimeline'
 import BudgetBreakdown from '@/components/BudgetBreakdown'
 import VariantSelector from '@/components/VariantSelector'
 import ExpandablePostCard from '@/components/ExpandablePostCard'
+import SaveButtonWrapper from '@/components/SaveButtonWrapper'
 import Link from 'next/link'
 
 interface RoutePageProps {
@@ -51,6 +52,20 @@ export default async function RoutePage({ params, searchParams }: RoutePageProps
           <div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">{route.title}</h1>
             <p className="text-gray-500">{route.description}</p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <SaveButtonWrapper
+              plan={{
+                type: 'route',
+                title: route.title,
+                description: route.description,
+                region: route.region,
+                routeId: route.id,
+                routeSlug: route.slug,
+                variantDuration: activeVariant.duration,
+                variantBudget: activeVariant.budgetLevel,
+              }}
+            />
           </div>
           {/* 小红书搜索按钮 */}
           <a

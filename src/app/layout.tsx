@@ -5,17 +5,17 @@ import MobileNav from '@/components/MobileNav'
 
 export const metadata: Metadata = {
   title: 'NZ Trail — 新西兰旅行计划',
-  description: '为留学生打造的新西兰旅行攻略，真实路线、真实预算、真实体验',
+  description: '探索新西兰，告别规划焦虑。AI 智能生成专属路线，覆盖南北岛，几分钟搞定行程',
   openGraph: {
     title: 'NZ Trail — 新西兰旅行计划',
-    description: '为留学生打造的新西兰旅行攻略，真实路线、真实预算、真实体验',
+    description: '探索新西兰，告别规划焦虑。AI 智能生成专属路线，覆盖南北岛，几分钟搞定行程',
     type: 'website',
     locale: 'zh_CN',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'NZ Trail — 新西兰旅行计划',
-    description: '为留学生打造的新西兰旅行攻略，真实路线、真实预算、真实体验',
+    description: '探索新西兰，告别规划焦虑。AI 智能生成专属路线，覆盖南北岛，几分钟搞定行程',
   },
 }
 
@@ -38,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Link>
             <nav className="flex gap-4 text-sm text-surface-fg/60">
               <Link href="/" className="hover:text-surface-fg transition-colors">首页</Link>
+              <Link href="/my-plans" className="hover:text-surface-fg transition-colors">我的计划</Link>
               <Link href="/about" className="hover:text-surface-fg transition-colors">关于</Link>
             </nav>
           </div>

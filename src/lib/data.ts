@@ -1,5 +1,5 @@
 import { prisma } from './prisma'
-import { type RouteWithVariants, type FilterState, type ItineraryDay } from './types'
+import { type RouteWithVariants, type ItineraryDay } from './types'
 
 // ── Destination highlight data ──
 
@@ -140,21 +140,8 @@ function enrichItinerary(itinerary: ItineraryDay[]): ItineraryDay[] {
   })
 }
 
-export async function getRoutes(filters?: FilterState): Promise<RouteWithVariants[]> {
-  const conditions: any[] = []
-
-  if (filters?.typeTags.length) {
-    filters.typeTags.forEach(tag => conditions.push({ typeTags: { contains: tag } }))
-  }
-  if (filters?.seasons.length) {
-    filters.seasons.forEach(season => conditions.push({ bestSeason: { contains: season } }))
-  }
-  if (filters?.durations.length) {
-    conditions.push({ variants: { some: { duration: { in: filters.durations } } } })
-  }
-
+export async function getRoutes(): Promise<RouteWithVariants[]> {
   const routes = await prisma.route.findMany({
-    where: conditions.length > 0 ? { AND: conditions } : {},
     include: {
       destinations: { include: { destination: true }, orderBy: { dayIndex: 'asc' } },
       variants: true,

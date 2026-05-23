@@ -85,22 +85,14 @@ export interface PostData {
   sourcePublishedAt: string
 }
 
+export type TravelStyle = '徒步' | '慢旅行' | '公路自驾' | '穷游' | '冒险' | '人文打卡'
+
 export type FilterState = {
-  typeTags: string[]
-  seasons: string[]
-  durations: string[]
+  style: TravelStyle | null
+  duration: '3-5天' | '7-10天' | '10-14天' | null
 }
 
-export const TYPE_TAG_OPTIONS = ['自驾公路', '极限运动', '自然徒步', '冰川湖泊', '滑雪', '霍比屯人文'] as const
-export const SEASON_OPTIONS = ['summer', 'autumn', 'winter', 'spring'] as const
 export const DURATION_OPTIONS = ['3-5天', '7-10天', '10-14天'] as const
-
-export const SEASON_LABELS: Record<string, string> = {
-  summer: '夏季 (12-2月)',
-  autumn: '秋季 (3-5月)',
-  winter: '冬季 (6-8月)',
-  spring: '春季 (9-11月)',
-}
 
 export const BUDGET_LABELS: Record<string, { label: string; color: string }> = {
   '穷游': { label: '💰 穷游', color: 'bg-green-100 text-green-800' },
@@ -120,7 +112,7 @@ export interface WizardAnswers {
   travelers?: '1' | '2' | '3-4' | '5+'
   duration?: '3-5天' | '7-10天' | '10-14天'
   budget?: '穷游' | '舒适' | '奢华'
-  interest?: '自然风光' | '极限运动' | '人文打卡'
+  interests?: string[]
   season?: 'summer' | 'autumn' | 'winter' | 'spring'
 }
 

@@ -6,9 +6,15 @@ import Link from 'next/link'
 import FilterBar from './FilterBar'
 import RouteCard from './RouteCard'
 import DiscoveryWizard from './DiscoveryWizard'
+import AIGeneratedResult from './AIGeneratedResult'
 import { matchRoutes, type MatchResult } from '@/lib/matchRoutes'
-import type { RouteWithVariants, FilterState, WizardAnswers } from '@/lib/types'
-import { TYPE_TAG_OPTIONS, SEASON_OPTIONS, DURATION_OPTIONS } from '@/lib/types'
+import type { RouteWithVariants, FilterState, WizardAnswers, TravelStyle } from '@/lib/types'
+import { DURATION_OPTIONS } from '@/lib/types'
+import { getSavedPlans } from '@/lib/savedPlans'
+import { addAIHistory } from '@/lib/aiHistory'
+
+const VALID_DURATIONS = DURATION_OPTIONS as readonly string[]
+const VALID_STYLES = ['徒步', '慢旅行', '公路自驾', '穷游', '冒险', '人文打卡'] as const
 
 interface HomeContentProps {
   routes: RouteWithVariants[]
@@ -25,19 +31,52 @@ interface HomeContentProps {
   }>
 }
 
+// ── Style → filter logic ──
+
+const STYLE_TAG_MAP: Record<TravelStyle, string[]> = {
+  '徒步': ['自然徒步', '冰川湖泊'],
+  '慢旅行': [],
+  '公路自驾': ['自驾公路'],
+  '穷游': [],
+  '冒险': ['极限运动', '滑雪'],
+  '人文打卡': ['霍比屯人文'],
+}
+
+function filterByStyle(routes: RouteWithVariants[], style: TravelStyle | null): RouteWithVariants[] {
+  if (!style) return routes
+
+  if (style === '慢旅行') {
+    return routes.filter(r => !r.typeTags.some(t => ['极限运动', '滑雪'].includes(t)))
+  }
+
+  if (style === '穷游') {
+    return routes.filter(r => r.variants.some(v => v.budgetLevel === '穷游'))
+  }
+
+  const tags = STYLE_TAG_MAP[style]
+  return tags.length > 0 ? routes.filter(r => r.typeTags.some(t => tags.includes(t))) : routes
+}
+
+function filterByDuration(routes: RouteWithVariants[], duration: string | null): RouteWithVariants[] {
+  if (!duration) return routes
+  return routes.filter(r => r.variants.some(v => v.duration === duration))
+}
+
+// ── URL param helpers ──
+
 function parseFiltersFromParams(params: URLSearchParams): FilterState {
+  const style = params.get('style')
+  const duration = params.get('duration')
   return {
-    typeTags: params.get('tags')?.split(',').filter(t => TYPE_TAG_OPTIONS.includes(t as any)) || [],
-    seasons: params.get('seasons')?.split(',').filter(s => SEASON_OPTIONS.includes(s as any)) || [],
-    durations: params.get('durations')?.split(',').filter(d => DURATION_OPTIONS.includes(d as any)) || [],
+    style: style && VALID_STYLES.includes(style as TravelStyle) ? (style as TravelStyle) : null,
+    duration: duration && VALID_DURATIONS.includes(duration) ? (duration as FilterState['duration']) : null,
   }
 }
 
 function filtersToParams(filters: FilterState): URLSearchParams {
   const params = new URLSearchParams()
-  if (filters.typeTags.length) params.set('tags', filters.typeTags.join(','))
-  if (filters.seasons.length) params.set('seasons', filters.seasons.join(','))
-  if (filters.durations.length) params.set('durations', filters.durations.join(','))
+  if (filters.style) params.set('style', filters.style)
+  if (filters.duration) params.set('duration', filters.duration)
   return params
 }
 
@@ -47,6 +86,10 @@ export default function HomeContent({ routes, posts }: HomeContentProps) {
   const [filters, setFilters] = useState<FilterState>(() => parseFiltersFromParams(searchParams))
   const [matchResults, setMatchResults] = useState<MatchResult[] | null>(null)
   const [hasSeenWizard, setHasSeenWizard] = useState(true)
+  const [wizardAnswers, setWizardAnswers] = useState<WizardAnswers | null>(null)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiResult, setAiResult] = useState<any>(null)
+  const [aiError, setAiError] = useState<string | null>(null)
 
   // Sync filters → URL
   useEffect(() => {
@@ -58,20 +101,74 @@ export default function HomeContent({ routes, posts }: HomeContentProps) {
     }
   }, [filters, router, searchParams])
 
+  // Load saved AI plan from "我的计划" link
+  useEffect(() => {
+    const aiPlanId = searchParams.get('ai-plan')
+    if (!aiPlanId) return
+    const plans = getSavedPlans()
+    const plan = plans.find(p => p.id === aiPlanId && p.type === 'ai')
+    if (plan?.aiData) {
+      setAiResult(plan.aiData)
+      // Scroll to it after render
+      setTimeout(() => {
+        document.getElementById('routes-section')?.scrollIntoView({ behavior: 'smooth' })
+      }, 500)
+    }
+  }, [searchParams])
+
   const handleWizardComplete = useCallback((answers: WizardAnswers) => {
     localStorage.setItem('wizard_seen', '1')
     setHasSeenWizard(true)
+    setWizardAnswers(answers)
     const results = matchRoutes(routes, answers)
     setMatchResults(results)
-  }, [routes])
+    // Clean wizard param from URL
+    if (searchParams.get('wizard')) {
+      router.replace('/', { scroll: false })
+    }
+  }, [routes, searchParams, router])
 
   const handleWizardSkip = useCallback(() => {
     localStorage.setItem('wizard_seen', '1')
     setHasSeenWizard(true)
+    setWizardAnswers(null)
     setMatchResults(null)
-  }, [])
+    if (searchParams.get('wizard')) {
+      router.replace('/', { scroll: false })
+    }
+  }, [searchParams, router])
 
-  // Derive display list with client-side filters applied on top
+  const handleGenerateAI = useCallback(async () => {
+    if (!wizardAnswers) return
+    setAiLoading(true)
+    setAiError(null)
+    setAiResult(null)
+    try {
+      const res = await fetch('/api/generate-itinerary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(wizardAnswers),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Generation failed')
+      setAiResult(json)
+      // Auto-save to AI history
+      addAIHistory({
+        id: `ai-${Date.now().toString(36)}`,
+        title: json.title,
+        description: json.description,
+        region: json.region,
+        createdAt: new Date().toISOString(),
+        aiData: json,
+      })
+    } catch (err: any) {
+      setAiError(err.message)
+    } finally {
+      setAiLoading(false)
+    }
+  }, [wizardAnswers])
+
+  // Derive display list: apply client-side style + duration cross-filter
   const displayResults = useMemo(() => {
     const source: MatchResult[] = matchResults ?? routes.map(r => ({
       route: r,
@@ -81,19 +178,28 @@ export default function HomeContent({ routes, posts }: HomeContentProps) {
       perPersonBudget: undefined,
     }))
 
-    if (filters.typeTags.length === 0 && filters.seasons.length === 0 && filters.durations.length === 0) {
-      return source
-    }
-
-    return source.filter(({ route }) => {
-      if (filters.typeTags.length > 0 && !route.typeTags.some(t => filters.typeTags.includes(t))) return false
-      if (filters.seasons.length > 0 && !route.bestSeason.some(s => filters.seasons.includes(s))) return false
-      if (filters.durations.length > 0 && !route.variants.some(v => filters.durations.includes(v.duration))) return false
+    // Apply style filter
+    let filtered = source.filter(({ route }) => {
+      if (filters.style) {
+        const styleFiltered = filterByStyle([route], filters.style)
+        if (styleFiltered.length === 0) return false
+      }
       return true
     })
+
+    // Apply duration filter
+    filtered = filtered.filter(({ route }) => {
+      if (filters.duration) {
+        const durFiltered = filterByDuration([route], filters.duration)
+        if (durFiltered.length === 0) return false
+      }
+      return true
+    })
+
+    return filtered
   }, [routes, matchResults, filters])
 
-  const hasFilters = filters.typeTags.length > 0 || filters.seasons.length > 0 || filters.durations.length > 0
+  const hasFilters = filters.style !== null || filters.duration !== null
 
   // Split results into matched vs other (only meaningful when wizard is active)
   const scoredResults = matchResults ? displayResults.filter(r => r.score > 0) : []
@@ -102,11 +208,54 @@ export default function HomeContent({ routes, posts }: HomeContentProps) {
   return (
     <div className="space-y-8">
       {/* Discovery Wizard */}
+      <div id="wizard-section" className="scroll-mt-20">
       <DiscoveryWizard
         onComplete={handleWizardComplete}
         onSkip={handleWizardSkip}
         hasSeenBefore={hasSeenWizard}
+        forceOpen={searchParams.get('wizard') === '1'}
       />
+      </div>
+
+      {/* AI Generation — trigger + result */}
+      {matchResults && wizardAnswers && (
+        <div className="space-y-4">
+          {!aiResult && (
+            <button
+              onClick={handleGenerateAI}
+              disabled={aiLoading}
+              className={`w-full py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+                aiLoading
+                  ? 'bg-gray-100 text-gray-400 cursor-wait'
+                  : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0'
+              }`}
+            >
+              {aiLoading ? (
+                <>
+                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="32" strokeLinecap="round" className="opacity-30" />
+                    <path d="M12 2a10 10 0 019.95 9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                  </svg>
+                  AI 正在为你规划路线...
+                </>
+              ) : (
+                <>
+                  <span>🤖</span> AI 智能生成专属路线
+                </>
+              )}
+            </button>
+          )}
+          {aiError && (
+            <div className="py-3 px-4 bg-red-50 rounded-xl text-sm text-red-600 flex items-center gap-2">
+              <span>⚠️</span> {aiError}
+              <button onClick={handleGenerateAI} className="ml-auto text-red-700 underline text-xs">重试</button>
+            </div>
+          )}
+          {aiResult && (
+            <AIGeneratedResult data={aiResult} onClose={() => setAiResult(null)} />
+          )}
+        </div>
+      )}
 
       <FilterBar filters={filters} onChange={setFilters} />
 
@@ -118,7 +267,7 @@ export default function HomeContent({ routes, posts }: HomeContentProps) {
               小红书热门体验
             </h2>
             <span className="text-xs text-gray-400">
-              来自真实留学生分享
+              来自真实旅行者分享
             </span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -165,6 +314,7 @@ export default function HomeContent({ routes, posts }: HomeContentProps) {
       )}
 
       {/* Matched routes — wizard results */}
+      <div id="routes-section" className="scroll-mt-20">
       {matchResults && scoredResults.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-4">
@@ -258,6 +408,7 @@ export default function HomeContent({ routes, posts }: HomeContentProps) {
           </div>
         </section>
       )}
+      </div>
     </div>
   )
 }

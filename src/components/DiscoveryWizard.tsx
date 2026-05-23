@@ -13,6 +13,7 @@ interface QuizQuestion {
   key: keyof WizardAnswers
   question: string
   options: { value: string; icon: string; label: string }[]
+  multiSelect?: boolean
 }
 
 const QUESTIONS: QuizQuestion[] = [
@@ -45,13 +46,23 @@ const QUESTIONS: QuizQuestion[] = [
     ],
   },
   {
-    key: 'interest',
-    question: '你对什么最感兴趣？',
+    key: 'interests',
+    question: '你对什么感兴趣？（可多选）',
     options: [
-      { value: '自然风光', icon: '🏔️', label: '自然风光' },
+      { value: '自然徒步', icon: '🏔️', label: '自然徒步' },
+      { value: '冰川湖泊', icon: '🏞️', label: '冰川湖泊' },
       { value: '极限运动', icon: '🪂', label: '极限运动' },
-      { value: '人文打卡', icon: '🎬', label: '人文打卡' },
+      { value: '滑雪', icon: '⛷️', label: '滑雪' },
+      { value: '自驾公路', icon: '🚗', label: '自驾公路' },
+      { value: '霍比屯人文', icon: '🎬', label: '霍比屯人文' },
+      { value: '温泉养生', icon: '♨️', label: '温泉养生' },
+      { value: '美食美酒', icon: '🍷', label: '美食美酒' },
+      { value: '野生动物', icon: '🐋', label: '野生动物' },
+      { value: '摄影打卡', icon: '📸', label: '摄影打卡' },
+      { value: '星空观测', icon: '⭐', label: '星空观测' },
+      { value: '城市漫步', icon: '🏙️', label: '城市漫步' },
     ],
+    multiSelect: true,
   },
   {
     key: 'season',
@@ -69,18 +80,34 @@ interface DiscoveryWizardProps {
   onComplete: (answers: WizardAnswers) => void
   onSkip: () => void
   hasSeenBefore: boolean
+  forceOpen?: boolean
 }
 
-export default function DiscoveryWizard({ onComplete, onSkip, hasSeenBefore }: DiscoveryWizardProps) {
-  const [phase, setPhase] = useState<WizardPhase>(hasSeenBefore ? 'collapsed' : 'welcome')
+export default function DiscoveryWizard({ onComplete, onSkip, hasSeenBefore, forceOpen }: DiscoveryWizardProps) {
+  const [phase, setPhase] = useState<WizardPhase>(() => {
+    if (forceOpen) return 'quiz'
+    return hasSeenBefore ? 'collapsed' : 'welcome'
+  })
   const [stepIndex, setStepIndex] = useState(0)
   const [answers, setAnswers] = useState<WizardAnswers>({})
   const [answeredSteps, setAnsweredSteps] = useState<boolean[]>([false, false, false, false, false])
 
   const currentQ = QUESTIONS[stepIndex]
-  const selectedValue = answers[currentQ.key] ?? null
+  const selectedValue = answers[currentQ.key] ?? (currentQ.multiSelect ? [] : null)
+  const isMulti = !!currentQ.multiSelect
 
   const handleSelect = useCallback((value: string) => {
+    if (isMulti) {
+      const prev = Array.isArray(answers.interests) ? answers.interests : []
+      const next = prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+      setAnswers({ ...answers, interests: next })
+      const newAnswered = [...answeredSteps]
+      newAnswered[stepIndex] = next.length > 0
+      setAnsweredSteps(newAnswered)
+      // Don't auto-advance for multi-select; user clicks button
+      return
+    }
+
     const newAnswers = { ...answers, [currentQ.key]: value }
     setAnswers(newAnswers)
     const newAnswered = [...answeredSteps]
@@ -95,19 +122,24 @@ export default function DiscoveryWizard({ onComplete, onSkip, hasSeenBefore }: D
         onComplete(newAnswers)
       }
     }, 400)
-  }, [stepIndex, currentQ.key, answeredSteps, answers, onComplete])
+  }, [stepIndex, currentQ.key, answeredSteps, answers, onComplete, isMulti])
 
   const handleSkipStep = useCallback(() => {
     const newAnswered = [...answeredSteps]
     newAnswered[stepIndex] = true
     setAnsweredSteps(newAnswered)
+    // For multi-select, ensure interests is at least an array
+    if (isMulti && !answers.interests) {
+      setAnswers({ ...answers, interests: [] })
+    }
     if (stepIndex < TOTAL_STEPS - 1) {
       setStepIndex(i => i + 1)
     } else {
+      const finalAnswers = isMulti && !answers.interests ? { ...answers, interests: [] } : answers
       setPhase('results')
-      onComplete(answers)
+      onComplete(finalAnswers)
     }
-  }, [stepIndex, answeredSteps, answers, onComplete])
+  }, [stepIndex, answeredSteps, answers, onComplete, isMulti])
 
   const handleWelcomeStart = useCallback(() => {
     localStorage.setItem('wizard_seen', '1')
@@ -149,12 +181,13 @@ export default function DiscoveryWizard({ onComplete, onSkip, hasSeenBefore }: D
         <QuizStep
           question={currentQ.question}
           options={currentQ.options}
-          selected={selectedValue as string}
+          selected={selectedValue as string | string[]}
           onSelect={handleSelect}
           onSkip={handleSkipStep}
           stepIndex={stepIndex}
           totalSteps={TOTAL_STEPS}
           answered={answeredSteps}
+          multiSelect={isMulti}
         />
       </div>
     )

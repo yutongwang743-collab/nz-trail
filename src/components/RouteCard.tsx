@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Mountain, Compass, MapPin } from 'lucide-react'
 import { type RouteWithVariants } from '@/lib/types'
 import ResultBadge from './ResultBadge'
+import SaveButton from './SaveButton'
 
 interface RouteCardProps {
   route: RouteWithVariants
@@ -54,6 +55,22 @@ export default function RouteCard({ route, matchScore, maxScore, perPersonBudget
         </div>
         {/* Overlay gradient for text readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+        {/* Save button */}
+        <div className="absolute top-3 right-3 z-10">
+          <SaveButton
+            plan={{
+              type: 'route',
+              title: route.title,
+              description: route.description,
+              region: route.region,
+              routeId: route.id,
+              routeSlug: route.slug,
+              variantDuration: durationSet[0],
+              variantBudget: budgetSet[0],
+            }}
+            className="!py-1.5 !px-3 !text-xs !rounded-lg !bg-black/40 hover:!bg-black/60 !text-white !backdrop-blur-sm shadow-lg"
+          />
+        </div>
         {/* Top badges */}
         <div className="absolute top-3 left-3 flex items-center gap-1.5">
           <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/25 backdrop-blur-sm text-white">

@@ -5,9 +5,18 @@ export type { MatchResult }
 // ── Interest → typeTags mapping ──
 
 const INTEREST_TAG_MAP: Record<string, string[]> = {
-  '自然风光': ['自然徒步', '冰川湖泊'],
-  '极限运动': ['极限运动', '滑雪'],
-  '人文打卡': ['霍比屯人文', '自驾公路'],
+  '自然徒步': ['自然徒步'],
+  '冰川湖泊': ['冰川湖泊'],
+  '极限运动': ['极限运动'],
+  '滑雪': ['滑雪'],
+  '自驾公路': ['自驾公路'],
+  '霍比屯人文': ['霍比屯人文'],
+  '温泉养生': ['自然徒步', '冰川湖泊'], // relax/nature adjacent
+  '美食美酒': ['自驾公路', '霍比屯人文'],
+  '野生动物': ['自然徒步', '冰川湖泊'],
+  '摄影打卡': ['自然徒步', '冰川湖泊', '霍比屯人文'],
+  '星空观测': ['自然徒步', '冰川湖泊'],
+  '城市漫步': ['霍比屯人文', '自驾公路'],
 }
 
 // ── Traveler count → divisor ──
@@ -45,12 +54,18 @@ export function matchRoutes(routes: RouteWithVariants[], answers: WizardAnswers)
         }
       }
 
-      // Interest
-      if (answers.interest) {
-        const targetTags = INTEREST_TAG_MAP[answers.interest]
-        if (route.typeTags.some(t => targetTags.includes(t))) {
-          score++
-          tags.push('兴趣匹配')
+      // Interests (multi-select)
+      if (answers.interests && answers.interests.length > 0) {
+        let interestMatches = 0
+        for (const interest of answers.interests) {
+          const targetTags = INTEREST_TAG_MAP[interest]
+          if (targetTags && route.typeTags.some(t => targetTags.includes(t))) {
+            interestMatches++
+          }
+        }
+        if (interestMatches > 0) {
+          score += interestMatches
+          tags.push(`兴趣匹配(${interestMatches})`)
         }
       }
 
@@ -91,7 +106,7 @@ function countActiveDimensions(answers: WizardAnswers): number {
   let count = 0
   if (answers.duration) count++
   if (answers.budget) count++
-  if (answers.interest) count++
+  if (answers.interests && answers.interests.length > 0) count++
   if (answers.season) count++
   return count
 }
