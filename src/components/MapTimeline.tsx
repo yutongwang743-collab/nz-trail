@@ -175,7 +175,7 @@ export default function MapTimeline({ itinerary, destinationCoords, diffMap, rel
     <div className="space-y-6">
       {/* Map */}
       <div className="relative">
-        <div ref={mapContainer} className="w-full h-[40vh] sm:h-[50vh] rounded-2xl overflow-hidden border border-gray-200" />
+        <div ref={mapContainer} className="w-full h-[35vh] sm:h-[45vh] rounded-2xl overflow-hidden border border-gray-200" />
         {!mapReady && (
           <div className="absolute inset-0 rounded-2xl bg-gray-100 animate-pulse flex items-center justify-center text-gray-400">
             加载地图中...

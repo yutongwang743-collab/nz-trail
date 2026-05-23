@@ -81,23 +81,23 @@ export default function AIGeneratedResult({ data, onClose }: Props) {
     <div className="bg-white rounded-2xl border-2 border-emerald-200 shadow-soft-lg overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-emerald-500 via-teal-500 to-sky-500 px-6 py-5">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5 mb-2">
               <span className="text-white/80 text-xs px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-sm">
                 🤖 AI 生成
               </span>
               <span className={`text-xs px-2 py-0.5 rounded-full ${REGION_COLOR[data.region] || 'bg-gray-100 text-gray-700'}`}>
                 {data.region}
               </span>
-              {(data.typeTags || []).slice(0, 3).map((tag: string) => (
-                <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-white/80">
+              {(data.typeTags || []).slice(0, 2).map((tag: string) => (
+                <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-white/80 hidden sm:inline">
                   {tag}
                 </span>
               ))}
             </div>
-            <h2 className="text-xl font-bold text-white">{data.title}</h2>
-            <p className="text-white/70 text-sm mt-1 max-w-lg">{data.description}</p>
+            <h2 className="text-lg md:text-xl font-bold text-white leading-tight">{data.title}</h2>
+            <p className="text-white/65 text-sm mt-1 max-w-lg line-clamp-2">{data.description}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <SaveButton
@@ -121,7 +121,7 @@ export default function AIGeneratedResult({ data, onClose }: Props) {
 
         {/* Variant selector */}
         {data.variants.length > 1 && (
-          <div className="flex gap-2 mt-4">
+          <div className="flex flex-wrap gap-1.5 mt-4">
             {data.variants.map((v, i) => (
               <button
                 key={i}
@@ -140,7 +140,7 @@ export default function AIGeneratedResult({ data, onClose }: Props) {
       </div>
 
       {/* Map + Timeline */}
-      <div className="p-4 sm:p-6">
+      <div className="p-3 sm:p-6">
         <MapTimeline
           itinerary={itinerary}
           destinationCoords={data.destinations || []}

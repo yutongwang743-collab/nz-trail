@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Info } from 'lucide-react'
+import { Home, Heart, Compass } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/', label: '首页', Icon: Home },
-  { href: '/about', label: '关于', Icon: Info },
+  { href: '/my-plans', label: '我的计划', Icon: Heart },
+  { href: '/about', label: '关于', Icon: Compass },
 ]
 
 export default function MobileNav() {

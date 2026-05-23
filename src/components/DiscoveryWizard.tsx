@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import WelcomePanel from './WelcomePanel'
 import QuizStep from './QuizStep'
 import type { WizardAnswers } from '@/lib/types'
@@ -91,6 +91,11 @@ export default function DiscoveryWizard({ onComplete, onSkip, hasSeenBefore, for
   const [stepIndex, setStepIndex] = useState(0)
   const [answers, setAnswers] = useState<WizardAnswers>({})
   const [answeredSteps, setAnsweredSteps] = useState<boolean[]>([false, false, false, false, false])
+
+  // Respond to Hero CTA force-open
+  useEffect(() => {
+    if (forceOpen) setPhase('quiz')
+  }, [forceOpen])
 
   const currentQ = QUESTIONS[stepIndex]
   const selectedValue = answers[currentQ.key] ?? (currentQ.multiSelect ? [] : null)

@@ -33,7 +33,7 @@ export default function TrustSection() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {items.map(item => (
           <div key={item.title} className="text-center p-4 rounded-2xl hover:bg-gray-50 transition">
             <div className="text-3xl mb-3">{item.icon}</div>

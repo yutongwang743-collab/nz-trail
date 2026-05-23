@@ -9,7 +9,7 @@ const scrollTo = (id: string) => {
 export default function HeroSection() {
   const router = useRouter()
   return (
-    <section className="relative min-h-[420px] md:min-h-[480px] flex items-center justify-center overflow-hidden -mx-4 px-4">
+    <section className="relative min-h-[340px] md:min-h-[480px] flex items-center justify-center overflow-hidden -mx-4 px-4">
       {/* Background layers */}
       <div className="absolute inset-0">
         {/* Deep forest green gradient */}
@@ -41,7 +41,7 @@ export default function HeroSection() {
           AI-Powered Travel Planning
         </div>
 
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.1]">
+        <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.15]">
           探索新西兰
           <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-sky-300 to-amber-200">
@@ -59,7 +59,12 @@ export default function HeroSection() {
           <button
             onClick={() => {
               router.push('/?wizard=1', { scroll: false })
-              setTimeout(() => scrollTo('wizard-section'), 300)
+              // Wait for React re-render then scroll
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  scrollTo('wizard-section')
+                })
+              })
             }}
             className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white text-gray-900 font-semibold text-sm shadow-lg shadow-black/20 hover:bg-gray-100 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
           >

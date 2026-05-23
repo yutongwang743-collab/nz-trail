@@ -42,7 +42,7 @@ export default async function RoutePage({ params, searchParams }: RoutePageProps
       </div>
 
       <div className="mb-6">
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex flex-wrap items-center gap-1.5 mb-2">
           <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{route.region}</span>
           {(route.typeTags as string[]).map((tag: string) => (
             <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-brand-50 text-brand-600">{tag}</span>

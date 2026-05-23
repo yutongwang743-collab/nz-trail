@@ -91,9 +91,13 @@ export default function HomeContent({ routes, posts }: HomeContentProps) {
   const [aiResult, setAiResult] = useState<any>(null)
   const [aiError, setAiError] = useState<string | null>(null)
 
-  // Sync filters → URL
+  // Sync filters → URL (preserve wizard & ai-plan params)
   useEffect(() => {
     const params = filtersToParams(filters)
+    const wizard = searchParams.get('wizard')
+    const aiPlan = searchParams.get('ai-plan')
+    if (wizard) params.set('wizard', wizard)
+    if (aiPlan) params.set('ai-plan', aiPlan)
     const qs = params.toString()
     const currentQs = searchParams.toString()
     if (qs !== currentQs) {
