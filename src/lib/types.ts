@@ -39,6 +39,7 @@ export interface RouteWithVariants {
   id: number
   title: string
   slug: string
+  country: string
   region: string
   coverImage: string
   description: string
@@ -88,6 +89,7 @@ export interface PostData {
 export type TravelStyle = '徒步' | '慢旅行' | '公路自驾' | '穷游' | '冒险' | '人文打卡'
 
 export type FilterState = {
+  country: '新西兰' | '澳大利亚' | null
   style: TravelStyle | null
   duration: '3-5天' | '7-10天' | '10-14天' | null
 }
@@ -100,6 +102,19 @@ export const BUDGET_LABELS: Record<string, { label: string; color: string }> = {
   '奢华': { label: '💰💰💰 奢华', color: 'bg-purple-100 text-purple-800' },
 }
 
+// ── Country → currency mapping ──
+
+export const COUNTRY_OPTIONS = ['新西兰', '澳大利亚'] as const
+
+export const COUNTRY_CURRENCY: Record<string, string> = {
+  '新西兰': 'NZD',
+  '澳大利亚': 'AUD',
+}
+
+export function currencyForCountry(country?: string): string {
+  return COUNTRY_CURRENCY[country || ''] || 'NZD'
+}
+
 export function parseRouteJSON<T>(field: string | string[]): T {
   if (typeof field === 'string') return JSON.parse(field)
   if (Array.isArray(field)) return field.map(f => typeof f === 'string' ? JSON.parse(f) : f) as T
@@ -109,6 +124,7 @@ export function parseRouteJSON<T>(field: string | string[]): T {
 // ── Discovery wizard types ──
 
 export interface WizardAnswers {
+  country?: '新西兰' | '澳大利亚'
   travelers?: '1' | '2' | '3-4' | '5+'
   duration?: '3-5天' | '7-10天' | '10-14天'
   budget?: '穷游' | '舒适' | '奢华'
@@ -140,6 +156,7 @@ export interface DestinationPageData {
   id: number
   name: string
   slug: string
+  country: string
   region: string
   coordinates: string
   coverImage: string

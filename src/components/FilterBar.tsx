@@ -25,6 +25,12 @@ const DURATION_OPTIONS = [
   { value: '10-14天' as const, label: '10-14天' },
 ]
 
+const COUNTRY_OPTIONS: Array<{ value: '新西兰' | '澳大利亚' | null; label: string }> = [
+  { value: null, label: '全部国家' },
+  { value: '新西兰', label: '新西兰' },
+  { value: '澳大利亚', label: '澳大利亚' },
+]
+
 interface FilterBarProps {
   filters: FilterState
   onChange: (filters: FilterState) => void
@@ -33,6 +39,26 @@ interface FilterBarProps {
 export default function FilterBar({ filters, onChange }: FilterBarProps) {
   return (
     <div className="space-y-3">
+      {/* Row 0: Country — single select */}
+      <div className="flex flex-wrap gap-2">
+        {COUNTRY_OPTIONS.map(opt => {
+          const isActive = filters.country === opt.value
+          return (
+            <button
+              key={opt.value ?? '__all_country__'}
+              onClick={() => onChange({ ...filters, country: opt.value })}
+              className={`px-3 py-1.5 rounded-full text-[13px] md:text-sm font-medium transition-all duration-200 ${
+                isActive
+                  ? 'bg-gray-900 text-white shadow-md shadow-gray-900/20 scale-105'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {opt.label}
+            </button>
+          )
+        })}
+      </div>
+
       {/* Row 1: Travel style — single select */}
       <div className="flex flex-wrap gap-2">
         {STYLE_OPTIONS.map(opt => {

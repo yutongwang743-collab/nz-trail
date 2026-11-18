@@ -15,6 +15,8 @@ from typing import Optional
 
 from playwright.async_api import async_playwright, Page
 
+from keywords import resolve_keywords
+
 AUTH_FILE = os.path.join(os.path.dirname(__file__), "xhs_auth.json")
 
 # === 关键词（6大类，65个）===
@@ -312,12 +314,13 @@ def save_posts(posts: list[ScrapedPost], output_path: str = "xhs_posts.json"):
     return output_path
 
 
-async def asyncio_run_scrape():
+async def asyncio_run_scrape(country: str = "新西兰"):
+    keywords = resolve_keywords(country, "xiaohongshu", KEYWORDS)
     print("=" * 50)
-    print("[XHS] 小红书新西兰旅行抓取")
-    print(f"      关键词: {len(KEYWORDS)} 个")
+    print(f"[XHS] 小红书{country}旅行抓取")
+    print(f"      关键词: {len(keywords)} 个")
     print("=" * 50)
-    posts = await scrape_xiaohongshu()
+    posts = await scrape_xiaohongshu(keywords=keywords)
     if posts:
         save_posts(posts)
     else:
@@ -329,10 +332,11 @@ async def asyncio_run_scrape():
 # ============================================================
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "scrape"
+    country = sys.argv[2] if len(sys.argv) > 2 else "新西兰"
 
     if cmd == "login":
         asyncio.run(login_and_save())
     elif cmd == "scrape":
-        asyncio.run(asyncio_run_scrape())
+        asyncio.run(asyncio_run_scrape(country))
     else:
-        print("用法: python xiaohongshu.py [login|scrape]")
+        print("用法: python xiaohongshu.py [login|scrape] [国家]")

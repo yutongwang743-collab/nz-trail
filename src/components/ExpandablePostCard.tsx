@@ -61,6 +61,21 @@ export default function ExpandablePostCard({ post }: ExpandablePostCardProps) {
       {/* Expanded content */}
       {expanded && (
         <div className="px-4 pb-4 border-t border-gray-100 pt-4 space-y-4">
+          {/* XHS link — prominent at top */}
+          <a
+            href={post.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between gap-3 p-3 rounded-xl text-white transition hover:shadow-md"
+            style={{ background: 'linear-gradient(135deg, #ff5a5f, #e51d1d)' }}
+          >
+            <div>
+              <div className="text-xs font-bold">📕 在小红书查看 @{post.authorName} 的原帖</div>
+              <div className="text-white/70 text-[10px] mt-0.5">跳转查看完整图文和评论</div>
+            </div>
+            <span className="text-sm">→</span>
+          </a>
+
           {/* AI Summary tags */}
           {summary.locations && summary.locations.length > 0 && (
             <div>
@@ -115,18 +130,12 @@ export default function ExpandablePostCard({ post }: ExpandablePostCardProps) {
             {post.rawContent.length > 200 && '...'}
           </div>
 
-          {/* Source link button */}
+          {/* Detail page link */}
           <a
-            href={post.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block w-full text-center py-2.5 rounded-xl text-sm font-medium transition"
-            style={{
-              background: 'linear-gradient(135deg, #ff5a5f, #e51d1d)',
-              color: 'white',
-            }}
+            href={`/posts/${post.id}`}
+            className="block w-full text-center py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
           >
-            在小红书查看原帖及相关内容 →
+            查看完整帖子详情 →
           </a>
         </div>
       )}

@@ -4,11 +4,12 @@ interface BudgetBreakdownProps {
   itinerary: ItineraryDay[]
   totalMin: number
   totalMax: number
+  currency?: string
 }
 
 const KEYS: (keyof CostBreakdown)[] = ['住宿', '交通', '餐饮', '门票', '活动']
 
-export default function BudgetBreakdown({ itinerary, totalMin, totalMax }: BudgetBreakdownProps) {
+export default function BudgetBreakdown({ itinerary, totalMin, totalMax, currency = 'NZD' }: BudgetBreakdownProps) {
   const totals: CostBreakdown = { 住宿: 0, 交通: 0, 餐饮: 0, 门票: 0, 活动: 0 }
   itinerary.forEach(day => {
     KEYS.forEach(k => { totals[k] += day.costBreakdown[k] })
@@ -16,7 +17,7 @@ export default function BudgetBreakdown({ itinerary, totalMin, totalMax }: Budge
 
   return (
     <div className="card p-4">
-      <h3 className="font-semibold text-gray-900 mb-3">💰 费用明细（NZD / 人）</h3>
+      <h3 className="font-semibold text-gray-900 mb-3">💰 费用明细（{currency} / 人）</h3>
 
       <div className="mb-4 p-3 bg-brand-50 rounded-xl text-center">
         <span className="text-2xl font-bold text-brand-600">
@@ -67,6 +68,8 @@ export default function BudgetBreakdown({ itinerary, totalMin, totalMax }: Budge
           })}
         </tbody>
       </table>
+
+      <p className="text-[10px] text-gray-400 mt-3">💡 以上为 AI 估算参考价，实际价格以预订平台实时价为准。</p>
     </div>
   )
 }

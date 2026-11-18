@@ -18,6 +18,9 @@ export default function AdminPage() {
   const [authed, setAuthed] = useState(false)
   const [loading, setLoading] = useState(true)
   const [posts, setPosts] = useState<Post[]>([])
+  const [importText, setImportText] = useState('')
+  const [importing, setImporting] = useState(false)
+  const [importResult, setImportResult] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/admin', {
@@ -62,6 +65,26 @@ export default function AdminPage() {
     loadPosts()
   }
 
+  async function handleImport() {
+    if (!importText.trim()) return
+    setImporting(true)
+    setImportResult(null)
+    const res = await fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'batch_import', rawText: importText }),
+    })
+    const data = await res.json()
+    setImporting(false)
+    if (data.ok) {
+      setImportResult(`成功导入 ${data.imported} 篇帖子`)
+      setImportText('')
+      loadPosts()
+    } else {
+      setImportResult(`失败: ${data.error}`)
+    }
+  }
+
   useEffect(() => {
     if (authed) loadPosts()
   }, [authed])
@@ -72,6 +95,38 @@ export default function AdminPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
       <h1 className="text-xl font-bold text-gray-900 mb-6">内容管理</h1>
+
+      {/* 批量导入 */}
+      <div className="card p-5 mb-8 border-brand-100 bg-brand-50/30">
+        <h2 className="font-semibold text-gray-900 mb-2">📥 批量导入帖子</h2>
+        <p className="text-xs text-gray-500 mb-4">
+          粘贴小红书帖子内容，每篇格式：<br/>
+          <code className="text-[11px] bg-white px-1 py-0.5 rounded">帖子链接（可选）<br/>标题<br/>正文内容<br/>---</code><br/>
+          多篇用 <code className="text-[11px] bg-white px-1 py-0.5 rounded">---</code> 分隔，AI 自动提取地点/活动/预算等
+        </p>
+        <textarea
+          value={importText}
+          onChange={e => setImportText(e.target.value)}
+          placeholder={`https://www.xiaohongshu.com/xxx\n皇后镇3天真的够！\n从悉尼飞皇后镇只要3小时...\n---\nhttps://www.xiaohongshu.com/yyy\nTekapo星空攻略\n堪培拉出发基督城往返...`}
+          rows={10}
+          className="w-full rounded-xl border border-gray-200 p-4 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-brand-200"
+          disabled={importing}
+        />
+        <div className="flex items-center gap-3 mt-3">
+          <button
+            onClick={handleImport}
+            disabled={importing || !importText.trim()}
+            className="btn-primary disabled:opacity-50"
+          >
+            {importing ? '导入中...' : '🤖 AI 提取并导入'}
+          </button>
+          {importResult && (
+            <span className={`text-sm ${importResult.startsWith('成功') ? 'text-green-600' : 'text-red-500'}`}>
+              {importResult}
+            </span>
+          )}
+        </div>
+      </div>
 
       <div className="space-y-2">
         {posts.map(post => (

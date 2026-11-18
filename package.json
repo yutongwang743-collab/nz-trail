@@ -9,6 +9,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev --name init",
     "db:seed": "tsx prisma/seed.ts",
+    "import:posts": "tsx crawler/import_to_db.ts",
     "db:reset": "prisma migrate reset --force",
     "postinstall": "prisma generate"
   },

@@ -6,6 +6,7 @@ export interface AIHistoryEntry {
   id: string
   title: string
   description: string
+  country?: string
   region: string
   createdAt: string
   aiData: any

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getDestinationBySlug } from '@/lib/data'
+import { getDestinationBySlug, getInsightsForDestination } from '@/lib/data'
 import TravelGuide from '@/components/TravelGuide'
 import RouteCard from '@/components/RouteCard'
 import ExpandablePostCard from '@/components/ExpandablePostCard'
@@ -13,7 +13,9 @@ export default async function DestinationPage({ params }: DestinationPageProps) 
   const dest = await getDestinationBySlug(params.slug)
   if (!dest) notFound()
 
-  const xhsSearchUrl = `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(dest.name + ' 新西兰')}&type=51`
+  const insights = await getInsightsForDestination(dest.name)
+
+  const xhsSearchUrl = `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(dest.name + ' ' + dest.country)}&type=51`
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -35,7 +37,7 @@ export default async function DestinationPage({ params }: DestinationPageProps) 
         <div className="absolute bottom-0 left-0 right-0 p-6">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-white">
-              {dest.region}
+              {dest.country} · {dest.region}
             </span>
             <span className="text-xs px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-white/90">
               {dest.type === 'city' ? '城市' : dest.type === 'natural_attraction' ? '自然景点' : '活动点'}
@@ -60,6 +62,26 @@ export default async function DestinationPage({ params }: DestinationPageProps) 
         <h2 className="text-lg font-semibold text-gray-900 mb-4">📋 旅行指南</h2>
         <TravelGuide info={dest.practicalInfo} />
       </div>
+
+      {/* AI Research Insights */}
+      {insights.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">💡 AI 研究参考（{insights.length}）</h2>
+          <div className="card p-4 space-y-2">
+            {insights.map(ins => (
+              <div key={ins.id} className="flex items-start gap-2 text-sm">
+                <span className="shrink-0 text-xs mt-0.5">{ins.type === 'travel_tip' ? '💡' : '📍'}</span>
+                <div className="flex-1">
+                  <span className="text-gray-700">{ins.content}</span>
+                  <span className="ml-2 text-xs text-gray-400">
+                    · 提到 {ins.mentionCount} 次{ins.confidence === 'high' ? ' · ✅高可信' : ''}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Routes passing through */}
       {dest.routes.length > 0 && (

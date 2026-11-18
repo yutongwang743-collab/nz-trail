@@ -54,17 +54,22 @@ export default async function PostPage({ params }: PostPageProps) {
         </div>
       </div>
 
-      <h1 className="text-xl font-bold text-gray-900 mb-4">{post.title}</h1>
+      <h1 className="text-xl font-bold text-gray-900 mb-2">{post.title}</h1>
 
-      {post.screenshots && post.screenshots.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 mb-6">
-          {post.screenshots.map((url: string, i: number) => (
-            <div key={i} className="aspect-[4/3] bg-gray-100 rounded-2xl flex items-center justify-center text-gray-400">
-              📸 原帖截图 {i + 1}
-            </div>
-          ))}
+      {/* 小红书原帖链接 — 直接推到前面 */}
+      <a
+        href={post.sourceUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-between gap-3 mb-6 p-4 rounded-2xl text-white transition hover:shadow-lg"
+        style={{ background: 'linear-gradient(135deg, #ff5a5f, #e51d1d)' }}
+      >
+        <div>
+          <div className="font-bold text-sm">📕 在小红书查看 @{post.authorName} 的原帖</div>
+          <div className="text-white/70 text-xs mt-0.5">跳转查看完整图文和评论互动</div>
         </div>
-      )}
+        <span className="shrink-0 text-lg">→</span>
+      </a>
 
       <div className="card p-4 mb-6 border-brand-100 bg-brand-50/30">
         <h2 className="font-semibold text-gray-900 mb-3">🤖 AI 路线要点提取</h2>
@@ -119,19 +124,30 @@ export default async function PostPage({ params }: PostPageProps) {
         <span>💬 {post.comments} 评论</span>
       </div>
 
-      {/* Direct blogger link */}
-      <div className="card p-4 bg-gradient-to-r from-red-50 to-pink-50 border-red-100 mb-6">
-        <p className="text-sm text-gray-600 mb-3">
-          想看更多 {post.authorName} 的分享？点击下方跳转小红书查看博主主页，获取更多真实旅行记录和实用攻略。
-        </p>
+      {/* Related route CTA */}
+      {post.route && (
+        <Link
+          href={`/routes/${post.route.slug}`}
+          className="mb-6 flex items-center justify-between gap-3 p-4 rounded-2xl border border-brand-200 bg-brand-50/50 hover:bg-brand-50 transition"
+        >
+          <div>
+            <div className="font-semibold text-gray-900">🗺️ 相关路线</div>
+            <div className="text-sm text-gray-600 mt-0.5">{post.route.title}</div>
+          </div>
+          <span className="text-brand-500 shrink-0 text-sm">查看路线 →</span>
+        </Link>
+      )}
+
+      {/* Bottom action */}
+      <div className="text-center">
         <a
           href={post.sourceUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="block w-full text-center py-3 rounded-xl text-sm font-bold text-white transition hover:shadow-lg"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium text-white hover:shadow-lg transition"
           style={{ background: 'linear-gradient(135deg, #ff5a5f, #e51d1d)' }}
         >
-          📕 在小红书查看 @{post.authorName} 的主页 →
+          📕 在小红书查看完整原帖 →
         </a>
       </div>
     </div>

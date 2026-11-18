@@ -2,8 +2,8 @@ export default function TrustSection() {
   const items = [
     {
       icon: '🗺️',
-      title: '覆盖南北岛',
-      desc: '从北岛霍比屯到南岛米尔福德峡湾，精选覆盖新西兰全境的旅行路线',
+      title: '覆盖澳洲与新西兰',
+      desc: '从新西兰南岛到澳洲塔斯马尼亚，精选覆盖多国的旅行路线',
     },
     {
       icon: '🤖',
@@ -26,10 +26,10 @@ export default function TrustSection() {
     <section className="border-t border-gray-100 mt-12 pt-12 pb-8">
       <div className="text-center mb-8">
         <h2 className="text-lg font-bold text-gray-900 mb-2">
-          为什么选择 NZ Trail
+          为什么选择旅游规划师
         </h2>
         <p className="text-sm text-gray-500">
-          不只是一个旅行网站，更像是你身边的新西兰旅行伙伴
+          不只是一个旅行网站，更像是你身边的旅行规划伙伴
         </p>
       </div>
 

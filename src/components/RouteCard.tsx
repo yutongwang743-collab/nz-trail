@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Mountain, Compass, MapPin } from 'lucide-react'
-import { type RouteWithVariants } from '@/lib/types'
+import { type RouteWithVariants, currencyForCountry } from '@/lib/types'
 import ResultBadge from './ResultBadge'
 import SaveButton from './SaveButton'
 
@@ -62,6 +62,7 @@ export default function RouteCard({ route, matchScore, maxScore, perPersonBudget
               type: 'route',
               title: route.title,
               description: route.description,
+              country: route.country,
               region: route.region,
               routeId: route.id,
               routeSlug: route.slug,
@@ -74,7 +75,7 @@ export default function RouteCard({ route, matchScore, maxScore, perPersonBudget
         {/* Top badges */}
         <div className="absolute top-3 left-3 flex items-center gap-1.5">
           <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/25 backdrop-blur-sm text-white">
-            {route.region}
+            {route.country} · {route.region}
           </span>
           {route.typeTags.slice(0, 1).map(tag => (
             <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-white/90">
@@ -92,7 +93,7 @@ export default function RouteCard({ route, matchScore, maxScore, perPersonBudget
             <span className="text-white/50 text-xs">·</span>
             <span className="text-white/80 text-xs">{budgetSet.join(' / ')}</span>
             <span className="text-white/50 text-xs">·</span>
-            <span className="text-white text-xs font-semibold">NZD {minBudget}+</span>
+            <span className="text-white text-xs font-semibold">{currencyForCountry(route.country)} {minBudget}+</span>
           </div>
         </div>
       </div>
@@ -102,7 +103,7 @@ export default function RouteCard({ route, matchScore, maxScore, perPersonBudget
         <p className="text-sm text-gray-500 line-clamp-2">{route.description}</p>
         {(matchScore !== undefined && matchScore > 0) && (
           <div className="pt-1">
-            <ResultBadge score={matchScore} maxScore={maxScore ?? 0} perPersonBudget={perPersonBudget} />
+            <ResultBadge score={matchScore} maxScore={maxScore ?? 0} perPersonBudget={perPersonBudget} currency={currencyForCountry(route.country)} />
           </div>
         )}
         <div className="flex items-center gap-1 text-xs text-gray-400 overflow-x-auto">

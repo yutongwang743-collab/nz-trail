@@ -120,6 +120,42 @@ const DEST_HIGHLIGHTS: Record<string, HighlightData> = {
     quote: { text: 'Bluff生蚝$25一打是全纽最鲜甜的！Stirling Point牌子打卡南岛最南端，感觉自己站在世界的尽头', author: '樱桃猎人🍒' },
     cover: 'https://loremflickr.com/640/360/bluff,oysters,stirling-point,southern-most,new-zealand'
   },
+  // ── 塔斯马尼亚（澳大利亚）──
+  hobart: {
+    desc: '塔斯马尼亚首府，MONA美术馆、萨拉曼卡集市与港口海鲜的完美组合。德温特河畔的砂岩仓库群是南半球最有格调的水岸。',
+    quote: { text: '霍巴特萨拉曼卡周六集市太好逛了！MONA坐渡轮过去像探险，那个"成人迪士尼"名不虚传', author: '塔州旅居日记' },
+    cover: 'https://loremflickr.com/640/360/hobart,tasmania,harbour,mona'
+  },
+  portarthur: {
+    desc: '世界遗产亚瑟港监狱遗址，澳洲流放史的活教材。30多座遗迹散落在半岛上，黄昏时分的监狱塔楼最出片。',
+    quote: { text: '亚瑟港遗址比想象中震撼，下午4点后游客少光线好，残垣断壁拍出来像电影截图', author: '南半球流浪者' },
+    cover: 'https://loremflickr.com/640/360/port-arthur,tasmania,convict,historic-site'
+  },
+  brunyisland: {
+    desc: '美食与野生动物的天堂：生蚝农场现捞现开、手工奶酪、The Neck双湾奇观，还有仅此一处的白袋鼠。',
+    quote: { text: '布鲁尼岛的生蚝是这辈子吃过最鲜的！The Neck左右两边海颜色完全不一样，白袋鼠可爱到犯规', author: '塔州旅居日记' },
+    cover: 'https://loremflickr.com/640/360/bruny-island,tasmania,oyster,neck'
+  },
+  wineglassbay: {
+    desc: '菲欣纳国家公园的招牌，弧线完美的白色沙滩被粉色花岗岩山环绕，徒步到山顶观景台是必经仪式。',
+    quote: { text: 'Wineglass Bay观景台爬上去腿软但值！那个弧线沙滩配粉红花岗岩，颜色太梦幻了', author: '南半球流浪者' },
+    cover: 'https://loremflickr.com/640/360/wineglass-bay,freycinet,tasmania,beach'
+  },
+  bayoffires: {
+    desc: '火焰湾的橙色地衣覆盖的花岗岩巨石与白沙滩、碧海形成强烈撞色，是塔州东海岸最惊艳的一段海岸线。',
+    quote: { text: '火焰湾的橙色石头是天然的！白色沙滩+橙色巨石+蓝到发绿的海水，随手一拍就是壁纸', author: '海岸线收集者' },
+    cover: 'https://loremflickr.com/640/360/bay-of-fires,tasmania,orange-lichen,coast'
+  },
+  cradlemountain: {
+    desc: '塔州最具代表性的高山景观，鸽子湖环湖步道平坦易走，沿途可能偶遇袋熊。摇篮山尖峰倒影在镜面湖水中。',
+    quote: { text: '摇篮山Dove Lake环湖2小时轻松走完，袋熊就在路边吃草！天气多变要带防风外套', author: '塔州旅居日记' },
+    cover: 'https://loremflickr.com/640/360/cradle-mountain,tasmania,dove-lake'
+  },
+  launceston: {
+    desc: '塔州第二大城市，卡塔拉特峡谷就在市区边缘，塔马河谷酒庄串起一条清爽的自驾品酒线。',
+    quote: { text: '朗塞斯顿的Cataract Gorge太惊喜了，孔雀就在身边走，坐缆车跨峡谷比想象中有意思', author: '南半球流浪者' },
+    cover: 'https://loremflickr.com/640/360/launceston,tasmania,cataract-gorge'
+  },
 }
 
 function resolveHighlightSlug(locationName: string): string {
@@ -266,4 +302,15 @@ export async function getDestinationBySlug(slug: string) {
   }
 
   return result
+}
+
+// ── AI 提取的经验知识库（按目的地聚合）──
+
+export async function getInsightsForDestination(destinationName: string, limit = 8) {
+  const insights = await prisma.extractedInsight.findMany({
+    where: { destination: destinationName },
+    orderBy: [{ mentionCount: 'desc' }, { confidence: 'desc' }],
+    take: limit,
+  })
+  return insights
 }

@@ -1,4 +1,4 @@
-// NZ location → image URL mapping (Unsplash direct URLs, permanent)
+// Location → image URL mapping (curated NZ entries + country-agnostic fallback)
 // Format: https://images.unsplash.com/photo-{ID}?w={width}&h={height}&fit=crop&auto=format
 
 const UNSPLASH_BASE = 'https://images.unsplash.com'
@@ -56,10 +56,10 @@ export function getLocationImage(name: string, w = 800, h = 500): { url: string;
       credit: entry.credit,
     }
   }
-  // Fallback: broad NZ landscape
+  // Country-agnostic fallback: keyword-based placeholder for any destination
   return {
-    url: `${UNSPLASH_BASE}/photo-1507699622108-4be3abd695ad?w=${w}&h=${h}&fit=crop&auto=format`,
-    credit: 'New Zealand landscape',
+    url: `https://loremflickr.com/${w}/${h}/${encodeURIComponent(name || 'travel')}`,
+    credit: name || 'Travel destination',
   }
 }
 

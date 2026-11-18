@@ -38,7 +38,7 @@ export default function WelcomePanel({ onStart, onSkip }: WelcomePanelProps) {
       >
         <div className="text-center space-y-4">
           <div className="text-5xl">🗺️</div>
-          <h2 className="text-xl font-bold text-gray-900">找到属于你的新西兰路线</h2>
+          <h2 className="text-xl font-bold text-gray-900">找到属于你的旅行路线</h2>
           <p className="text-sm text-gray-500">回答几个简单问题，帮你匹配最合适的旅行方案</p>
 
           <div className="flex gap-3 pt-2">

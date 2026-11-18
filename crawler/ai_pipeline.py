@@ -9,7 +9,7 @@ from typing import Optional
 from anthropic import Anthropic
 
 
-SYSTEM_PROMPT = """你是一个新西兰旅行路线分析助手。你的任务是从社交媒体帖子内容中提取结构化的旅行信息。
+SYSTEM_PROMPT = """你是一个旅行路线分析助手。你的任务是从社交媒体帖子内容中提取结构化的旅行信息（国家/地点、活动、时长、预算、季节、交通、关键提示）。
 
 请从帖子中提取以下字段，以 JSON 格式返回：
 

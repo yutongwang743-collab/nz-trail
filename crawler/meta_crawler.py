@@ -10,6 +10,8 @@ import os
 from dataclasses import dataclass, asdict
 from playwright.async_api import async_playwright
 
+from keywords import resolve_keywords
+
 OUTPUT_DIR = os.path.dirname(__file__)
 
 SEARCH_QUERIES = [
@@ -222,14 +224,17 @@ def save_posts(posts: list[TravelPost], path: str = "nz_travel_posts.json"):
     print(f"分类: {json.dumps(categories, ensure_ascii=False)}")
 
 
-async def main():
+async def main(country: str = "新西兰"):
+    queries = resolve_keywords(country, "meta", SEARCH_QUERIES)
     print("=" * 50)
-    print("NZ Travel Meta Crawler (DuckDuckGo)")
-    print(f"搜索词: {len(SEARCH_QUERIES)}")
+    print(f"Travel Meta Crawler (DuckDuckGo) — {country}")
+    print(f"搜索词: {len(queries)}")
     print("=" * 50)
-    posts = await search_duckduckgo()
+    posts = await search_duckduckgo(queries)
     save_posts(posts)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    import sys
+    country = sys.argv[1] if len(sys.argv) > 1 else "新西兰"
+    asyncio.run(main(country))

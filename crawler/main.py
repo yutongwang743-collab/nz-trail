@@ -1,23 +1,26 @@
-"""爬虫入口：依次运行各平台爬虫，合并结果，调用 AI 管线处理。"""
+"""爬虫入口：依次运行各平台爬虫，合并结果，调用 AI 管线处理。
+
+用法: python main.py [国家]   # 默认新西兰，可选「澳大利亚」
+"""
 
 import asyncio
-import json
 import sys
-from pathlib import Path
 
-from xiaohongshu import search_xiaohongshu, save_posts, ScrapedPost
+from xiaohongshu import search_xiaohongshu, save_posts, ScrapedPost, KEYWORDS
 from ai_pipeline import process_posts, save_to_db_format
+from keywords import resolve_keywords
 
 
-async def main():
+async def main(country: str = "新西兰"):
     print("=" * 60)
-    print("NZ Travel Crawler — 新西兰旅行内容抓取")
+    print(f"Travel Crawler — {country}旅行内容抓取")
     print("=" * 60)
 
     all_posts: list[ScrapedPost] = []
+    xhs_keywords = resolve_keywords(country, "xiaohongshu", KEYWORDS)
 
     print("\n[1/1] 小红书搜索...")
-    xhs_posts = await search_xiaohongshu()
+    xhs_posts = await search_xiaohongshu(keywords=xhs_keywords)
     all_posts.extend(xhs_posts)
     print(f"  小红书: {len(xhs_posts)} 条")
 
@@ -35,4 +38,5 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    country = sys.argv[1] if len(sys.argv) > 1 else "新西兰"
+    asyncio.run(main(country))

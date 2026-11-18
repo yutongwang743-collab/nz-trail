@@ -1,12 +1,12 @@
 export default function AboutPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">关于 NZ Trail</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">关于旅游规划师</h1>
       <div className="prose prose-gray text-sm space-y-4">
         <p>
-          NZ Trail 是一个为澳洲留学生打造的新西兰旅行计划工具。
-          我们聚合小红书、抖音等社交媒体上的真实旅行帖子，用 AI 提取结构化路线信息，
-          帮你快速找到适合自己的新西兰旅行方案。
+          旅游规划师（Travel Planner）是一个为澳新留学生与旅行者打造的 AI 旅行计划工具。
+          我们聚合社交媒体上的真实旅行帖子，用 AI 提取结构化路线信息，
+          帮你快速找到适合自己的旅行方案——覆盖新西兰与澳洲各地。
         </p>
         <h2 className="text-lg font-semibold mt-8">信息来源</h2>
         <p>

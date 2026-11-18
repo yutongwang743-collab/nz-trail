@@ -7,6 +7,7 @@ export interface SavedPlan {
   type: 'route' | 'ai'
   title: string
   description: string
+  country?: string
   region: string
   savedAt: string
   // type='route'

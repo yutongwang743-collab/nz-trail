@@ -50,7 +50,7 @@ interface MapTimelineProps {
   relatedPosts?: RelatedPost[]
 }
 
-const NZ_CENTER: [number, number] = [172.6, -43.5]
+const DEFAULT_CENTER: [number, number] = [145.0, -40.0]  // generic Oceania fallback
 
 // Resolve "queenstown" → DestinationCoord even if case/format varies
 function findDest(destinations: DestinationCoord[], locationName: string): DestinationCoord | undefined {
@@ -83,7 +83,7 @@ export default function MapTimeline({ itinerary, destinationCoords, diffMap, rel
         },
         layers: [{ id: 'osm-layer', type: 'raster', source: 'osm' }],
       },
-      center: destinationCoords[0]?.coordinates ?? NZ_CENTER,
+      center: destinationCoords[0]?.coordinates ?? DEFAULT_CENTER,
       zoom: 7,
     })
 
@@ -348,14 +348,23 @@ export default function MapTimeline({ itinerary, destinationCoords, diffMap, rel
                     </div>
                     <div className="flex gap-2 overflow-x-auto pb-1">
                       {day.restaurants.map((r, ri) => (
-                        <div key={ri} className="shrink-0 w-[160px] rounded-lg overflow-hidden border border-gray-100 bg-white">
-                          <img src={r.image} alt={r.name} className="w-full h-24 object-cover" loading="lazy" />
+                        <a
+                          key={ri}
+                          href={`https://www.google.com/maps/search/${encodeURIComponent(r.name + ' ' + (day.locations[0] || ''))}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0 w-[160px] rounded-lg overflow-hidden border border-gray-100 bg-white hover:shadow-md hover:border-brand-200 transition cursor-pointer group"
+                        >
+                          <img src={r.image} alt={r.name} className="w-full h-24 object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                           <div className="p-2">
-                            <div className="text-xs font-semibold text-gray-800 truncate">{r.name}</div>
+                            <div className="text-xs font-semibold text-gray-800 truncate group-hover:text-brand-500 transition-colors">{r.name}</div>
                             <div className="text-[10px] text-gray-500 mt-0.5">{r.dish} · {r.price}</div>
                             <div className="text-[10px] text-amber-600 mt-1 line-clamp-2">💡 {r.tip}</div>
+                            <div className="text-[10px] text-blue-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              🗺️ Google Maps →
+                            </div>
                           </div>
-                        </div>
+                        </a>
                       ))}
                     </div>
                   </div>

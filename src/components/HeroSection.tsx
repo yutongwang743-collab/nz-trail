@@ -42,7 +42,7 @@ export default function HeroSection() {
         </div>
 
         <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.15]">
-          探索新西兰
+          探索澳洲与新西兰
           <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-sky-300 to-amber-200">
             告别规划焦虑
@@ -51,7 +51,7 @@ export default function HeroSection() {
 
         <p className="mt-5 text-base md:text-lg text-white/65 max-w-md mx-auto leading-relaxed">
           不用翻遍攻略、不用对比价格。告诉我们你的偏好，
-          几分钟内获得一条完整的新西兰旅行路线。
+          几分钟内获得一条完整的旅行路线。
         </p>
 
         {/* CTAs */}
@@ -87,7 +87,7 @@ export default function HeroSection() {
 
         {/* Trust bar */}
         <div className="mt-10 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-white/45 text-xs">
-          <span>覆盖南北岛</span>
+          <span>覆盖澳洲与新西兰</span>
           <span className="w-0.5 h-0.5 rounded-full bg-white/20" />
           <span>AI 智能推荐</span>
           <span className="w-0.5 h-0.5 rounded-full bg-white/20" />

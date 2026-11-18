@@ -11,7 +11,8 @@ model Destination {
   id          Int      @id @default(autoincrement())
   name        String
   slug        String   @unique
-  region      String   // "南岛" | "北岛"
+  country     String   @default("新西兰") // "新西兰" | "澳大利亚" | ...
+  region      String   // 州/大区：新西兰=南岛/北岛，澳洲=塔斯马尼亚/昆士兰等
   coordinates String   // "lat,lng"
   coverImage  String
   description String
@@ -26,7 +27,8 @@ model Route {
   id           Int      @id @default(autoincrement())
   title        String
   slug         String   @unique
-  region       String   // "南岛" | "北岛" | "跨岛"
+  country      String   @default("新西兰") // "新西兰" | "澳大利亚" | ...
+  region       String   // 州/大区：新西兰=南岛/北岛，澳洲=塔斯马尼亚/昆士兰等
   coverImage   String
   description  String
   bestSeason   String   // JSON array: ["summer","autumn","winter","spring"]
@@ -84,4 +86,31 @@ model Post {
   sourcePublishedAt DateTime
   crawledAt       DateTime @default(now())
   createdAt       DateTime @default(now())
+}
+
+// AI 从攻略中提取的结构化经验（去重聚合的知识库）
+model ExtractedInsight {
+  id           Int      @id @default(autoincrement())
+  country      String   @default("新西兰")
+  destination  String   // 目的地/景点名称
+  type         String   // "travel_tip" | "recommendation"
+  content      String   // 提取的经验/提示内容
+  source       String   // 来源（帖子标题）
+  confidence   String   @default("medium") // high | medium | low
+  mentionCount Int      @default(1)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([destination, content])
+}
+
+// 价格快照（外部 API 查询结果，带来源与时间戳）
+model PriceRecord {
+  id        Int      @id @default(autoincrement())
+  itemType  String   // "flight" | "hotel" | "activity"
+  itemName  String   // 如 "SYD→HBA" / "Hobart"
+  source    String   // "amadeus" | "ai_estimate"
+  price     Float
+  currency  String   @default("AUD")
+  fetchedAt DateTime @default(now())
 }

@@ -6,6 +6,8 @@ import time
 from dataclasses import dataclass, asdict
 from playwright.async_api import async_playwright, Page
 
+from keywords import resolve_keywords
+
 MAFENGWO_KEYWORDS = [
     # 景区/景点
     "新西兰南岛景点", "皇后镇攻略", "米尔福德峡湾攻略", "特卡波湖攻略",
@@ -228,14 +230,17 @@ def save_posts(posts: list[TravelPost], output_path: str = "mafengwo_posts.json"
     return output_path
 
 
-async def main():
+async def main(country: str = "新西兰"):
+    keywords = resolve_keywords(country, "mafengwo", MAFENGWO_KEYWORDS)
     print("=" * 50)
-    print("马蜂窝 新西兰旅行内容抓取")
-    print(f"关键词数: {len(MAFENGWO_KEYWORDS)}")
+    print(f"马蜂窝 {country}旅行内容抓取")
+    print(f"关键词数: {len(keywords)}")
     print("=" * 50)
-    posts = await search_mafengwo()
+    posts = await search_mafengwo(keywords)
     save_posts(posts)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    import sys
+    country = sys.argv[1] if len(sys.argv) > 1 else "新西兰"
+    asyncio.run(main(country))

@@ -7,7 +7,7 @@ import type { WizardAnswers } from '@/lib/types'
 
 type WizardPhase = 'welcome' | 'quiz' | 'results' | 'collapsed'
 
-const TOTAL_STEPS = 5
+const TOTAL_STEPS = 6
 
 interface QuizQuestion {
   key: keyof WizardAnswers
@@ -17,6 +17,14 @@ interface QuizQuestion {
 }
 
 const QUESTIONS: QuizQuestion[] = [
+  {
+    key: 'country',
+    question: '你想去哪里？',
+    options: [
+      { value: '新西兰', icon: '🥝', label: '新西兰' },
+      { value: '澳大利亚', icon: '🦘', label: '澳大利亚' },
+    ],
+  },
   {
     key: 'travelers',
     question: '几个人一起出行？',
@@ -54,7 +62,7 @@ const QUESTIONS: QuizQuestion[] = [
       { value: '极限运动', icon: '🪂', label: '极限运动' },
       { value: '滑雪', icon: '⛷️', label: '滑雪' },
       { value: '自驾公路', icon: '🚗', label: '自驾公路' },
-      { value: '霍比屯人文', icon: '🎬', label: '霍比屯人文' },
+      { value: '人文打卡', icon: '🏛️', label: '人文打卡' },
       { value: '温泉养生', icon: '♨️', label: '温泉养生' },
       { value: '美食美酒', icon: '🍷', label: '美食美酒' },
       { value: '野生动物', icon: '🐋', label: '野生动物' },
@@ -90,7 +98,7 @@ export default function DiscoveryWizard({ onComplete, onSkip, hasSeenBefore, for
   })
   const [stepIndex, setStepIndex] = useState(0)
   const [answers, setAnswers] = useState<WizardAnswers>({})
-  const [answeredSteps, setAnsweredSteps] = useState<boolean[]>([false, false, false, false, false])
+  const [answeredSteps, setAnsweredSteps] = useState<boolean[]>([false, false, false, false, false, false])
 
   // Respond to Hero CTA force-open
   useEffect(() => {
@@ -161,7 +169,7 @@ export default function DiscoveryWizard({ onComplete, onSkip, hasSeenBefore, for
     setPhase('welcome')
     setStepIndex(0)
     setAnswers({})
-    setAnsweredSteps([false, false, false, false, false])
+    setAnsweredSteps([false, false, false, false, false, false])
     setPhase('quiz')  // skip welcome panel on retry
   }, [])
 

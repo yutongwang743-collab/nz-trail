@@ -2,9 +2,10 @@ interface ResultBadgeProps {
   score: number
   maxScore: number
   perPersonBudget?: { min: number; max: number }
+  currency?: string
 }
 
-export default function ResultBadge({ score, maxScore, perPersonBudget }: ResultBadgeProps) {
+export default function ResultBadge({ score, maxScore, perPersonBudget, currency = 'NZD' }: ResultBadgeProps) {
   if (score === 0 && !perPersonBudget) return null
 
   return (
@@ -16,7 +17,7 @@ export default function ResultBadge({ score, maxScore, perPersonBudget }: Result
       )}
       {perPersonBudget && (
         <span className="text-xs px-2 py-0.5 rounded-full bg-brand-50 text-brand-600">
-          人均 NZD {perPersonBudget.min}-{perPersonBudget.max}
+          人均 {currency} {perPersonBudget.min}-{perPersonBudget.max}
         </span>
       )}
     </div>

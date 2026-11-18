@@ -11,6 +11,8 @@ import re
 from dataclasses import dataclass, asdict
 from playwright.async_api import async_playwright
 
+from keywords import MULTI_AU_URLS
+
 OUTPUT_DIR = os.path.dirname(__file__)
 
 
@@ -172,13 +174,22 @@ def save_all(posts: list[TravelPost], path: str = "nz_travel_data.json"):
     return full_path
 
 
-async def main():
+async def main(country: str = "新西兰"):
+    if country == "澳大利亚":
+        qiyer_urls = MULTI_AU_URLS["qyer"]
+        wikivoyage_urls = MULTI_AU_URLS["wikivoyage"]
+        tripadvisor_urls = MULTI_AU_URLS["tripadvisor"]
+    else:
+        qiyer_urls = QIYER_URLS
+        wikivoyage_urls = WIKIVOYAGE_URLS
+        tripadvisor_urls = TRIPADVISOR_URLS
+
     print("=" * 60)
-    print("NZ Travel Multi-Crawler v2")
-    print(f"  穷游网: {len(QIYER_URLS)} 页")
-    print(f"  Wikivoyage: {len(WIKIVOYAGE_URLS)} 页")
-    print(f"  猫途鹰: {len(TRIPADVISOR_URLS)} 页")
-    print(f"  总计: {len(QIYER_URLS) + len(WIKIVOYAGE_URLS) + len(TRIPADVISOR_URLS)} 页")
+    print(f"Travel Multi-Crawler v2 — {country}")
+    print(f"  穷游网: {len(qiyer_urls)} 页")
+    print(f"  Wikivoyage: {len(wikivoyage_urls)} 页")
+    print(f"  猫途鹰: {len(tripadvisor_urls)} 页")
+    print(f"  总计: {len(qiyer_urls) + len(wikivoyage_urls) + len(tripadvisor_urls)} 页")
     print("=" * 60)
 
     async with async_playwright() as p:
@@ -197,7 +208,7 @@ async def main():
 
         # 1. 穷游网
         print("\n--- [穷游网] ---", flush=True)
-        for platform, name, url in QIYER_URLS:
+        for platform, name, url in qiyer_urls:
             posts = await extract_page_content(page, url, name)
             for p in posts:
                 p.source_platform = platform
@@ -208,7 +219,7 @@ async def main():
 
         # 2. Wikivoyage
         print("\n--- [Wikivoyage] ---", flush=True)
-        for platform, name, url in WIKIVOYAGE_URLS:
+        for platform, name, url in wikivoyage_urls:
             posts = await extract_page_content(page, url, name)
             for p in posts:
                 p.source_platform = platform
@@ -219,7 +230,7 @@ async def main():
 
         # 3. 猫途鹰
         print("\n--- [猫途鹰] ---", flush=True)
-        for platform, name, url in TRIPADVISOR_URLS:
+        for platform, name, url in tripadvisor_urls:
             posts = await extract_page_content(page, url, name)
             for p in posts:
                 p.source_platform = platform
@@ -244,4 +255,6 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    import sys
+    country = sys.argv[1] if len(sys.argv) > 1 else "新西兰"
+    asyncio.run(main(country))

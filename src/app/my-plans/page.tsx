@@ -96,7 +96,7 @@ export default function MyPlansPage() {
                     <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
                       🤖 AI 生成
                     </span>
-                    <span className="text-xs text-gray-400">{entry.region}</span>
+                    <span className="text-xs text-gray-400">{entry.country ? `${entry.country} · ` : ''}{entry.region}</span>
                     <button
                       onClick={() => handleRemoveHistory(entry.id)}
                       className="ml-auto text-xs text-gray-400 hover:text-red-500 transition"
@@ -152,7 +152,7 @@ export default function MyPlansPage() {
                     }`}>
                       {plan.type === 'ai' ? '🤖 AI 生成' : '📋 已有路线'}
                     </span>
-                    <span className="text-xs text-gray-400">{plan.region}</span>
+                    <span className="text-xs text-gray-400">{plan.country ? `${plan.country} · ` : ''}{plan.region}</span>
                     <button
                       onClick={() => handleRemovePlan(plan.id)}
                       className="ml-auto text-xs text-gray-400 hover:text-red-500 transition"

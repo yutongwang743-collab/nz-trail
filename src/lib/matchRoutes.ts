@@ -10,13 +10,13 @@ const INTEREST_TAG_MAP: Record<string, string[]> = {
   '极限运动': ['极限运动'],
   '滑雪': ['滑雪'],
   '自驾公路': ['自驾公路'],
-  '霍比屯人文': ['霍比屯人文'],
+  '人文打卡': ['人文打卡', '霍比屯人文'],
   '温泉养生': ['自然徒步', '冰川湖泊'], // relax/nature adjacent
-  '美食美酒': ['自驾公路', '霍比屯人文'],
-  '野生动物': ['自然徒步', '冰川湖泊'],
-  '摄影打卡': ['自然徒步', '冰川湖泊', '霍比屯人文'],
+  '美食美酒': ['自驾公路', '人文打卡', '霍比屯人文'],
+  '野生动物': ['自然徒步', '冰川湖泊', '人文打卡'],
+  '摄影打卡': ['自然徒步', '冰川湖泊', '人文打卡', '霍比屯人文'],
   '星空观测': ['自然徒步', '冰川湖泊'],
-  '城市漫步': ['霍比屯人文', '自驾公路'],
+  '城市漫步': ['人文打卡', '自驾公路', '霍比屯人文'],
 }
 
 // ── Traveler count → divisor ──
@@ -33,7 +33,12 @@ const TRAVELER_DIVISOR: Record<string, number> = {
 export function matchRoutes(routes: RouteWithVariants[], answers: WizardAnswers): MatchResult[] {
   const activeDims = countActiveDimensions(answers)
 
-  return routes
+  // Country filter: when user picks a country, only score routes in that country
+  const candidateRoutes = answers.country
+    ? routes.filter(r => r.country === answers.country)
+    : routes
+
+  return candidateRoutes
     .map(route => {
       let score = 0
       const tags: string[] = []

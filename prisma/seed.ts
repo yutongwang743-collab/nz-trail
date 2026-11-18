@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { rebuildInsights } from '../src/lib/insights'
 
 const prisma = new PrismaClient()
 
@@ -927,7 +928,240 @@ async function main() {
     await prisma.post.create({ data: p })
   }
 
-  console.log('Seed complete: 22 destinations, 11 routes, 17 variants, 75 posts')
+  // ── 塔斯马尼亚（澳大利亚）──
+
+  const tas = await Promise.all([
+    prisma.destination.create({
+      data: {
+        name: '霍巴特', slug: 'hobart', country: '澳大利亚', region: '塔斯马尼亚',
+        coordinates: '-42.8821,147.3272',
+        coverImage: 'https://loremflickr.com/640/480/hobart,tasmania,harbour',
+        description: '塔斯马尼亚首府，MONA美术馆、萨拉曼卡集市与海鲜港口的完美组合',
+        type: 'city',
+        practicalInfo: JSON.stringify({
+          bestSeason: '夏季12-2月最热闹，秋季3-5月颜色最美',
+          ticketPrice: 'MONA美术馆$39，萨拉曼卡集市免费',
+          transport: '霍巴特机场(HBA)，悉尼/墨尔本直飞约1.5-2h，市区+周边自驾',
+          stayDuration: '建议2-3晚作为环线起点',
+          nearbySpots: [{ name: '布鲁尼岛', distance: '45分钟车程+轮渡', slug: 'bruny-island' }, { name: '亚瑟港', distance: '1.5小时车程', slug: 'port-arthur' }],
+          accommodation: '舒适Hotel Grand Chancellor $200起，民宿$150起',
+          xhsTags: ['霍巴特攻略', 'MONA美术馆', '萨拉曼卡集市']
+        })
+      }
+    }),
+    prisma.destination.create({
+      data: {
+        name: '亚瑟港', slug: 'port-arthur', country: '澳大利亚', region: '塔斯马尼亚',
+        coordinates: '-43.1500,147.8500',
+        coverImage: 'https://loremflickr.com/640/480/port-arthur,tasmania,convict',
+        description: '世界遗产亚瑟港监狱遗址，澳洲流放史的活教材',
+        type: 'activity_spot',
+        practicalInfo: JSON.stringify({
+          bestSeason: '全年，夏季日照长适合傍晚参观',
+          ticketPrice: '成人$47含讲解与海湾游船，门票两日有效',
+          transport: '从霍巴特自驾1.5小时',
+          stayDuration: '建议半天到1天',
+          nearbySpots: [{ name: '霍巴特', distance: '1.5小时车程', slug: 'hobart' }],
+          accommodation: '多在霍巴特住宿',
+          xhsTags: ['亚瑟港攻略', '澳洲监狱遗址', '塔斯马尼亚人文']
+        })
+      }
+    }),
+    prisma.destination.create({
+      data: {
+        name: '布鲁尼岛', slug: 'bruny-island', country: '澳大利亚', region: '塔斯马尼亚',
+        coordinates: '-43.3667,147.2833',
+        coverImage: 'https://loremflickr.com/640/480/bruny-island,tasmania,oyster',
+        description: '美食与野生动物的天堂：生蚝农场、手工奶酪、The Neck双湾奇观与白袋鼠',
+        type: 'natural_attraction',
+        practicalInfo: JSON.stringify({
+          bestSeason: '全年，夏季生蚝最肥美',
+          ticketPrice: '车渡$47/车往返，生蚝农场品鉴$15-25',
+          transport: '从霍巴特自驾45分钟到Kettering码头+15分钟轮渡',
+          stayDuration: '建议1天（一日游）',
+          nearbySpots: [{ name: '霍巴特', distance: '45分钟+轮渡', slug: 'hobart' }],
+          accommodation: '多在霍巴特住宿，岛上也有Airbnb',
+          xhsTags: ['布鲁尼岛攻略', '塔斯马尼亚生蚝', 'The Neck']
+        })
+      }
+    }),
+    prisma.destination.create({
+      data: {
+        name: '酒杯湾', slug: 'wineglass-bay', country: '澳大利亚', region: '塔斯马尼亚',
+        coordinates: '-42.1617,148.3097',
+        coverImage: 'https://loremflickr.com/640/480/wineglass-bay,freycinet,tasmania',
+        description: '菲欣纳国家公园招牌，弧线完美的白色沙滩被粉色花岗岩山环绕',
+        type: 'natural_attraction',
+        practicalInfo: JSON.stringify({
+          bestSeason: '全年，夏季适合下水，春秋徒步最舒适',
+          ticketPrice: '菲欣纳国家公园车辆票$44.75/天（或使用国家公园通票）',
+          transport: '从霍巴特自驾2.5小时到Freycinet',
+          stayDuration: '建议1天（可住Bicheno）',
+          nearbySpots: [{ name: '火焰湾', distance: '1.5小时车程', slug: 'bay-of-fires' }],
+          accommodation: 'Bicheno民宿$160起，Freycinet Lodge$280起',
+          xhsTags: ['酒杯湾攻略', 'Freycinet', '塔斯马尼亚东海岸']
+        })
+      }
+    }),
+    prisma.destination.create({
+      data: {
+        name: '火焰湾', slug: 'bay-of-fires', country: '澳大利亚', region: '塔斯马尼亚',
+        coordinates: '-41.1270,148.2700',
+        coverImage: 'https://loremflickr.com/640/480/bay-of-fires,tasmania,coast',
+        description: '橙色地衣覆盖的花岗岩巨石与白沙滩、碧海的强烈撞色海岸线',
+        type: 'natural_attraction',
+        practicalInfo: JSON.stringify({
+          bestSeason: '全年，晴天颜色最鲜艳',
+          ticketPrice: '免费（海边观景步道），部分区域在国家公园内',
+          transport: '从Bicheno自驾1.5小时，或从朗塞斯顿2小时',
+          stayDuration: '建议半天',
+          nearbySpots: [{ name: '酒杯湾', distance: '1.5小时车程', slug: 'wineglass-bay' }],
+          accommodation: '多住Bicheno或St Helens',
+          xhsTags: ['火焰湾攻略', 'Bay of Fires', '塔斯马尼亚东海岸']
+        })
+      }
+    }),
+    prisma.destination.create({
+      data: {
+        name: '摇篮山', slug: 'cradle-mountain', country: '澳大利亚', region: '塔斯马尼亚',
+        coordinates: '-41.6840,145.9500',
+        coverImage: 'https://loremflickr.com/640/480/cradle-mountain,tasmania,dove-lake',
+        description: '塔州最具代表性的高山景观，鸽子湖环湖步道平坦易走，可能偶遇袋熊',
+        type: 'natural_attraction',
+        practicalInfo: JSON.stringify({
+          bestSeason: '夏季12-3月步道全开，冬季6-8月雪景壮观',
+          ticketPrice: 'Cradle Mountain Icon Daily Pass $30.70/成人（含穿梭巴士）',
+          transport: '从朗塞斯顿自驾2小时',
+          stayDuration: '建议1天（Dove Lake环湖2小时）',
+          nearbySpots: [{ name: '朗塞斯顿', distance: '2小时车程', slug: 'launceston' }],
+          accommodation: 'Peppers Cradle Mountain Lodge $280起',
+          xhsTags: ['摇篮山攻略', 'Cradle Mountain', 'Dove Lake']
+        })
+      }
+    }),
+    prisma.destination.create({
+      data: {
+        name: '朗塞斯顿', slug: 'launceston', country: '澳大利亚', region: '塔斯马尼亚',
+        coordinates: '-41.4332,147.1441',
+        coverImage: 'https://loremflickr.com/640/480/launceston,tasmania,cataract-gorge',
+        description: '塔州第二大城市，卡塔拉特峡谷就在市区边缘，塔马河谷酒庄串起自驾品酒线',
+        type: 'city',
+        practicalInfo: JSON.stringify({
+          bestSeason: '全年，春秋温和',
+          ticketPrice: '卡塔拉特峡谷免费（缆车$18往返），酒庄品酒$5-15',
+          transport: '朗塞斯顿机场(LST)，从霍巴特自驾2小时',
+          stayDuration: '建议1-2晚',
+          nearbySpots: [{ name: '摇篮山', distance: '2小时车程', slug: 'cradle-mountain' }],
+          accommodation: 'Peppers Silo $180起，市区酒店$150起',
+          xhsTags: ['朗塞斯顿攻略', 'Cataract Gorge', '塔马河谷酒庄']
+        })
+      }
+    }),
+  ])
+
+  const [hobart, portArthur, brunyIsland, wineglassBay, bayOfFires, cradleMountain, launceston] = tas
+
+  // ── 塔斯马尼亚 3-5天精华环线 ──
+  const tasRoute = await prisma.route.create({
+    data: {
+      title: '塔斯马尼亚 3-5天精华环线',
+      slug: 'tasmania-classic-loop',
+      country: '澳大利亚',
+      region: '塔斯马尼亚',
+      coverImage: 'https://loremflickr.com/640/480/tasmania,australia,landscape',
+      description: '从霍巴特出发，布鲁尼岛生蚝+酒杯湾+火焰湾+摇篮山+朗塞斯顿，人文、美食、海岸、自然一网打尽',
+      bestSeason: JSON.stringify(['summer', 'autumn', 'spring']),
+      typeTags: JSON.stringify(['自驾公路', '自然徒步', '美食美酒', '野生动物', '人文打卡']),
+      featuredOrder: 100,
+    }
+  })
+
+  await prisma.routeDestination.createMany({
+    data: [
+      { routeId: tasRoute.id, destinationId: hobart.id, dayIndex: 1 },
+      { routeId: tasRoute.id, destinationId: brunyIsland.id, dayIndex: 2 },
+      { routeId: tasRoute.id, destinationId: portArthur.id, dayIndex: 2 },
+      { routeId: tasRoute.id, destinationId: wineglassBay.id, dayIndex: 3 },
+      { routeId: tasRoute.id, destinationId: bayOfFires.id, dayIndex: 4 },
+      { routeId: tasRoute.id, destinationId: launceston.id, dayIndex: 4 },
+      { routeId: tasRoute.id, destinationId: cradleMountain.id, dayIndex: 5 },
+    ]
+  })
+
+  await prisma.routeVariant.createMany({
+    data: [
+      {
+        routeId: tasRoute.id, duration: '3-5天', budgetLevel: '舒适',
+        itinerary: JSON.stringify([
+          { day: 1, locations: ['hobart'], activities: ['萨拉曼卡集市(周六)', 'MONA美术馆', 'Battery Point漫步', '宪法码头海鲜晚餐'], transport: '机场取车+步行', meals: '午餐萨拉曼卡市集 晚餐宪法码头海鲜', accommodation: 'Hotel Grand Chancellor Hobart ($200)', morningNote: '落地霍巴特机场取车（提前订租车，澳洲右舵注意）→ 若逢周六先逛萨拉曼卡集市（早8点到下午3点，手作+农产品）', afternoonNote: '乘MONA渡轮（Brooke St Pier出发，$15单程）约25分钟到MONA美术馆（$39，周四至周一开，闭馆周二周三）→ 逛"成人迪士尼"2-3小时', eveningNote: '宪法码头（Constitution Dock）吃塔州生蚝+海鲜拼盘 → Battery Point砂岩老街区散步看日落', weatherTip: '霍巴特天气多变，带薄外套，码头傍晚风大', costBreakdown: { 住宿: 200, 交通: 30, 餐饮: 110, 门票: 39, 活动: 0 }, photoSpots: [{ name: 'Salamanca砂岩仓库群', tip: '周六上午光线最好，集市人流是绝佳人文前景', image: 'https://loremflickr.com/300/200/hobart-salamanca' }, { name: 'MONA外景', tip: '下渡轮后的铁锈红外墙+德温特河背景', image: 'https://loremflickr.com/300/200/hobart-mona' }], restaurants: [{ name: 'Mures Upper Deck', dish: '塔州生蚝+龙虾', price: '$30-60', tip: '窗边位看港口，生蚝现开最鲜', image: 'https://loremflickr.com/300/200/mures-seafood' }] },
+          { day: 2, locations: ['bruny-island'], activities: ['车渡上岛', '生蚝农场品鉴', 'Bruny Island Cheese', 'The Neck观景台', '白袋鼠寻踪'], transport: '自驾+轮渡', meals: '午餐生蚝农场 晚餐回霍巴特', accommodation: 'Hotel Grand Chancellor Hobart ($200)', morningNote: '9:00从霍巴特自驾45分钟到Kettering码头乘轮渡（$47/车往返，船班约30分钟一班）→ 上岛直奔Get Shucked生蚝农场', afternoonNote: 'Get Shucked现捞生蚝$15-25/打 + Bruny Island Cheese奶酪拼盘 → The Neck观景台（左右双湾同框，木栈道5分钟登顶）', eveningNote: '黄昏在Adventure Bay找白袋鼠（仅布鲁尼岛有，灰白毛色）→ 乘轮渡返回霍巴特', weatherTip: '轮渡靠天气，大风可能停航，出发前查SeaLink班次', costBreakdown: { 住宿: 200, 交通: 60, 餐饮: 130, 门票: 0, 活动: 24 }, photoSpots: [{ name: 'The Neck', tip: '木栈道顶端360度拍双湾+沙滩+远山', image: 'https://loremflickr.com/300/200/bruny-neck' }], restaurants: [{ name: 'Get Shucked', dish: '现开太平洋生蚝', price: '$15-25/打', tip: '配柠檬原味最能吃出鲜甜', image: 'https://loremflickr.com/300/200/get-shucked' }] },
+          { day: 3, locations: ['wineglass-bay'], activities: ['自驾东海岸公路', 'Wineglass Bay Lookout徒步', '酒杯湾沙滩', 'Bicheno企鹅'], transport: '自驾(2.5h)', meals: '午餐Freycinet 晚餐Bicheno', accommodation: 'Bicheno民宿 ($180)', morningNote: '8:00霍巴特出发沿东海岸公路(Tasman Hwy)北上2.5小时 → 到达Freycinet国家公园（车辆票$44.75）→ 停车Wineglass Bay Trackhead', afternoonNote: 'Wineglass Bay Lookout往返1.5-2小时（爬坡略累但观景台弧线沙滩值得）→ 体力好可下到沙滩 → 傍晚驱车到Bicheno', eveningNote: 'Bicheno黄昏参加小企鹅归巢导览（$30-40，需预订，晚上才能看到Eudyptula企鹅上岸）', weatherTip: 'Wineglass Bay山顶风大，徒步穿防滑鞋，带水', costBreakdown: { 住宿: 180, 交通: 50, 餐饮: 100, 门票: 22, 活动: 35 }, photoSpots: [{ name: 'Wineglass Bay Lookout', tip: '观景台护栏外拍弧线沙滩+粉红花岗岩', image: 'https://loremflickr.com/300/200/wineglass-lookout' }], restaurants: [{ name: 'The Lobster Shack', dish: '塔州岩龙虾', price: '$45-60', tip: 'Bicheno海边现捞，龙虾+蒜香黄油', image: 'https://loremflickr.com/300/200/bicheno-lobster' }] },
+          { day: 4, locations: ['bay-of-fires', 'launceston'], activities: ['火焰湾白沙滩', '橙色花岗岩海岸', '自驾到朗塞斯顿', '卡塔拉特峡谷'], transport: '自驾(2h+2h)', meals: '午餐St Helens 晚餐朗塞斯顿', accommodation: 'Peppers Silo Launceston ($180)', morningNote: '9:00Bicheno出发北上1小时到火焰湾（Bay of Fires）→ The Gardens与Binalong Bay的白沙滩+橙色地衣巨石拍照（免费）', afternoonNote: '12:00 St Helens午餐（海鲜小镇）→ 14:00自驾2小时到朗塞斯顿 → 卡塔拉特峡谷（Cataract Gorge，市区步行10分钟，免费+孔雀）', eveningNote: '峡谷缆车($18往返)俯瞰South Esk河 → 朗塞斯顿老城晚餐（塔马河谷黑皮诺）', weatherTip: '火焰湾正午光线最艳，但也最晒，涂防晒', costBreakdown: { 住宿: 180, 交通: 55, 餐饮: 100, 门票: 18, 活动: 0 }, photoSpots: [{ name: '火焰湾橙色巨石', tip: '低角度拍巨石+白沙滩+碧海撞色', image: 'https://loremflickr.com/300/200/bay-of-fires-rock' }, { name: 'Cataract Gorge', tip: '缆车上俯拍峡谷+河湾', image: 'https://loremflickr.com/300/200/cataract-gorge' }], restaurants: [{ name: 'Stillwater', dish: '塔马河谷黑皮诺+鸭胸', price: '$40-60', tip: '老磨坊改造的河景餐厅，需提前订', image: 'https://loremflickr.com/300/200/stillwater-launceston' }] },
+          { day: 5, locations: ['cradle-mountain'], activities: ['自驾到摇篮山', 'Dove Lake环湖徒步', '袋熊寻踪', '返回朗塞斯顿飞离'], transport: '自驾(2h+2h)', meals: '午餐摇篮山Visitor Centre 晚餐机场或朗塞斯顿', accommodation: '', morningNote: '8:00朗塞斯顿出发自驾2小时到摇篮山Visitor Centre → 购Icon Daily Pass($30.70含穿梭巴士) → 乘巴士进Dove Lake', afternoonNote: 'Dove Lake环湖步道（6km平坦约2小时，摇篮山尖峰倒影+可能偶遇袋熊）→ 下午驱车返回朗塞斯顿', eveningNote: '还车 → 朗塞斯顿机场(LST)或霍巴特机场飞离，结束塔州环线', weatherTip: '摇篮山天气多变，带防风防水外套，雨雾中尖峰更仙', costBreakdown: { 住宿: 0, 交通: 60, 餐饮: 80, 门票: 31, 活动: 0 }, photoSpots: [{ name: 'Dove Lake倒影', tip: '清晨无风时湖面如镜，拍尖峰倒影', image: 'https://loremflickr.com/300/200/dove-lake' }], restaurants: [{ name: 'Peppers Highlander', dish: '塔州和牛+当地红酒', price: '$45-65', tip: '摇篮山脚下，徒步后犒劳自己', image: 'https://loremflickr.com/300/200/cradle-highlander' }] }
+        ]),
+        totalBudgetMin: 2800, totalBudgetMax: 3600
+      },
+      {
+        routeId: tasRoute.id, duration: '3-5天', budgetLevel: '穷游',
+        itinerary: JSON.stringify([
+          { day: 1, locations: ['hobart'], activities: ['萨拉曼卡集市', '宪法码头', '市区免费景点'], transport: '步行+公交', meals: '午餐市集 晚餐自行解决', accommodation: 'Hobart Hostel (床位$40)', costBreakdown: { 住宿: 40, 交通: 10, 餐饮: 50, 门票: 0, 活动: 0 } },
+          { day: 2, locations: ['bruny-island'], activities: ['车渡上岛', 'The Neck观景台', '生蚝农场(可选)', '白袋鼠寻踪'], transport: '自驾+轮渡', meals: '午餐自备 晚餐回霍巴特', accommodation: 'Hobart Hostel (床位$40)', costBreakdown: { 住宿: 40, 交通: 50, 餐饮: 55, 门票: 0, 活动: 24 } },
+          { day: 3, locations: ['wineglass-bay'], activities: ['东海岸自驾', 'Wineglass Bay Lookout徒步', '酒杯湾沙滩'], transport: '自驾(2.5h)', meals: '午餐自备 晚餐Bicheno', accommodation: 'Bicheno青旅 ($45)', costBreakdown: { 住宿: 45, 交通: 45, 餐饮: 50, 门票: 22, 活动: 0 } }
+        ]),
+        totalBudgetMin: 500, totalBudgetMax: 750
+      }
+    ]
+  })
+
+  // ── 塔斯马尼亚帖子（关联塔州环线）──
+  await prisma.post.createMany({
+    data: [
+      {
+        routeId: tasRoute.id, sourcePlatform: '小红书',
+        authorName: '塔州旅居日记', authorAvatar: '',
+        title: '霍巴特两天就够了！MONA美术馆+萨拉曼卡集市全攻略',
+        rawContent: '霍巴特两天足够玩透！第一天先坐MONA渡轮（Brooke St Pier出发$15单程），25分钟到MONA美术馆，门票$39，那个"成人迪士尼"真的名不虚传，逛2-3小时。第二天如果是周六一定要去萨拉曼卡集市（8点-15点），手作+农产品+街头艺人超有氛围。晚上去宪法码头（Constitution Dock）吃塔州生蚝，Mures的现开生蚝$30-60超鲜。Battery Point的砂岩老街区适合傍晚散步看日落。住宿推荐Hotel Grand Chancellor $200起，就在码头边。',
+        aiSummary: JSON.stringify({ locations: ['霍巴特', 'MONA美术馆', '萨拉曼卡集市'], activities: ['MONA美术馆', '萨拉曼卡集市', '宪法码头海鲜', 'Battery Point'], duration: '2天', budget: '$300', season: '全年', transport: '渡轮+步行', keyTips: ['MONA乘渡轮过去像探险', '萨拉曼卡集市只有周六开', '宪法码头生蚝必吃', 'MONA闭馆周二周三'] }),
+        screenshots: JSON.stringify(["https://loremflickr.com/300/400/hobart-mona", "https://loremflickr.com/300/400/salamanca-market"]),
+        sourceUrl: 'https://www.xiaohongshu.com/search_result?keyword=%E9%9C%8D%E5%B7%B4%E7%89%B9MONA%E6%94%BB%E7%95%A5',
+        likes: 4560, saves: 2100, comments: 320, status: 'auto_published', sourcePublishedAt: new Date('2026-11-05'),
+      },
+      {
+        routeId: tasRoute.id, sourcePlatform: '小红书',
+        authorName: '生蚝猎人🦪', authorAvatar: '',
+        title: '布鲁尼岛生蚝是这辈子吃过最鲜的！附一日游攻略',
+        rawContent: '从霍巴特自驾45分钟到Kettering码头，乘SeaLink车渡（$47/车往返）上布鲁尼岛。直奔Get Shucked生蚝农场，现捞现开$15-25/打，配柠檬原味最能吃出鲜甜，是这辈子吃过最鲜的生蚝！隔壁Bruny Island Cheese的手工奶酪拼盘也值得。然后去The Neck观景台，木栈道5分钟登顶，左右双湾同框超震撼。黄昏在Adventure Bay找白袋鼠（全世界只有布鲁尼岛有），灰白毛色可爱到犯规。',
+        aiSummary: JSON.stringify({ locations: ['布鲁尼岛', '霍巴特'], activities: ['生蚝农场', 'The Neck观景台', '白袋鼠寻踪', '奶酪品鉴'], duration: '1天', budget: '$100', season: '全年', transport: '自驾+轮渡', keyTips: ['Get Shucked现开生蚝$15-25/打', '车渡$47/车往返', '白袋鼠只有布鲁尼岛有', '轮渡大风可能停航先查班次'] }),
+        screenshots: JSON.stringify(["https://loremflickr.com/300/400/bruny-oyster", "https://loremflickr.com/300/400/bruny-neck"]),
+        sourceUrl: 'https://www.xiaohongshu.com/search_result?keyword=%E5%B8%83%E9%B2%81%E5%B0%BC%E5%B2%9B%E7%94%9F%E8%9A%9D',
+        likes: 5230, saves: 2450, comments: 389, status: 'auto_published', sourcePublishedAt: new Date('2026-11-08'),
+      },
+      {
+        routeId: tasRoute.id, sourcePlatform: '小红书',
+        authorName: '塔州旅居日记', authorAvatar: '',
+        title: '摇篮山Dove Lake环湖2小时，路边全是袋熊！',
+        rawContent: '从朗塞斯顿自驾2小时到摇篮山Visitor Centre，买Cradle Mountain Icon Daily Pass（$30.70含穿梭巴士）。乘巴士进Dove Lake，环湖步道6km平坦约2小时轻松走完，摇篮山尖峰倒影在镜面湖水上绝美。最惊喜的是路边全是袋熊在吃草！它们慢悠悠的根本不怕人（但别靠太近）。下午还有体力可以走Rainforest Walk看古树。提醒：摇篮山天气多变，务必带防风防水外套，雨雾中尖峰反而更仙。',
+        aiSummary: JSON.stringify({ locations: ['摇篮山', '朗塞斯顿'], activities: ['Dove Lake环湖徒步', '袋熊寻踪', '摇篮山尖峰', 'Rainforest Walk'], duration: '1天', budget: '$80', season: '全年', transport: '自驾+穿梭巴士', keyTips: ['Icon Daily Pass $30.70含穿梭巴士', '环湖6km约2小时', '路边就能看到袋熊', '天气多变带防风外套'] }),
+        screenshots: JSON.stringify(["https://loremflickr.com/300/400/cradle-mountain", "https://loremflickr.com/300/400/dove-lake"]),
+        sourceUrl: 'https://www.xiaohongshu.com/search_result?keyword=%E6%91%87%E7%AF%AE%E5%B1%B1%E6%94%BB%E7%95%A5',
+        likes: 6120, saves: 2900, comments: 445, status: 'auto_published', sourcePublishedAt: new Date('2026-11-10'),
+      },
+      {
+        routeId: tasRoute.id, sourcePlatform: '小红书',
+        authorName: '海岸线收集者🌊', authorAvatar: '',
+        title: '塔州东海岸自驾：火焰湾+酒杯湾，颜色太犯规了',
+        rawContent: '塔州东海岸自驾是全程最惊艳的一段！先到火焰湾（Bay of Fires），The Gardens和Binalong Bay的橙色地衣巨石+白沙滩+碧海撞色，随手一拍就是壁纸，完全免费。然后南下到Freycinet国家公园（车辆票$44.75），走Wineglass Bay Lookout往返1.5-2小时，爬坡略累但观景台的弧线沙滩+粉红花岗岩值得！晚上住Bicheno，参加小企鹅归巢导览（$30-40需预订），看Eudyptula小企鹅摇摇晃晃上岸太治愈了。',
+        aiSummary: JSON.stringify({ locations: ['火焰湾', '酒杯湾', 'Bicheno'], activities: ['火焰湾白沙滩', '酒杯湾观景台徒步', 'Bicheno企鹅', '东海岸自驾'], duration: '2天', budget: '$200', season: '夏秋', transport: '自驾', keyTips: ['火焰湾橙色巨石免费', 'Wineglass Bay Lookout往返1.5-2小时', 'Bicheno晚上看企鹅归巢', 'Freycinet车辆票$44.75'] }),
+        screenshots: JSON.stringify(["https://loremflickr.com/300/400/bay-of-fires", "https://loremflickr.com/300/400/wineglass-bay"]),
+        sourceUrl: 'https://www.xiaohongshu.com/search_result?keyword=%E5%A1%94%E5%B7%9E%E4%B8%9C%E6%B5%B7%E5%B2%B8%E8%87%AA%E9%A9%BE',
+        likes: 5480, saves: 2600, comments: 412, status: 'auto_published', sourcePublishedAt: new Date('2026-11-12'),
+      },
+    ]
+  })
+
+  const insightCount = await rebuildInsights(prisma)
+
+  console.log(`Seed complete: destinations, routes, variants, posts + ${insightCount} insights (新西兰 + 塔斯马尼亚)`)
 }
 
 main()

@@ -7,6 +7,7 @@ import FilterBar from './FilterBar'
 import RouteCard from './RouteCard'
 import DiscoveryWizard from './DiscoveryWizard'
 import AIGeneratedResult from './AIGeneratedResult'
+import ResearchProgress from './ResearchProgress'
 import { matchRoutes, type MatchResult } from '@/lib/matchRoutes'
 import type { RouteWithVariants, FilterState, WizardAnswers, TravelStyle } from '@/lib/types'
 import { DURATION_OPTIONS } from '@/lib/types'
@@ -15,6 +16,7 @@ import { addAIHistory } from '@/lib/aiHistory'
 
 const VALID_DURATIONS = DURATION_OPTIONS as readonly string[]
 const VALID_STYLES = ['徒步', '慢旅行', '公路自驾', '穷游', '冒险', '人文打卡'] as const
+const VALID_COUNTRIES = ['新西兰', '澳大利亚'] as const
 
 interface HomeContentProps {
   routes: RouteWithVariants[]
@@ -39,7 +41,7 @@ const STYLE_TAG_MAP: Record<TravelStyle, string[]> = {
   '公路自驾': ['自驾公路'],
   '穷游': [],
   '冒险': ['极限运动', '滑雪'],
-  '人文打卡': ['霍比屯人文'],
+  '人文打卡': ['人文打卡', '霍比屯人文'],
 }
 
 function filterByStyle(routes: RouteWithVariants[], style: TravelStyle | null): RouteWithVariants[] {
@@ -67,7 +69,9 @@ function filterByDuration(routes: RouteWithVariants[], duration: string | null):
 function parseFiltersFromParams(params: URLSearchParams): FilterState {
   const style = params.get('style')
   const duration = params.get('duration')
+  const country = params.get('country')
   return {
+    country: country && VALID_COUNTRIES.includes(country as '新西兰' | '澳大利亚') ? (country as FilterState['country']) : null,
     style: style && VALID_STYLES.includes(style as TravelStyle) ? (style as TravelStyle) : null,
     duration: duration && VALID_DURATIONS.includes(duration) ? (duration as FilterState['duration']) : null,
   }
@@ -75,6 +79,7 @@ function parseFiltersFromParams(params: URLSearchParams): FilterState {
 
 function filtersToParams(filters: FilterState): URLSearchParams {
   const params = new URLSearchParams()
+  if (filters.country) params.set('country', filters.country)
   if (filters.style) params.set('style', filters.style)
   if (filters.duration) params.set('duration', filters.duration)
   return params
@@ -90,6 +95,7 @@ export default function HomeContent({ routes, posts }: HomeContentProps) {
   const [aiLoading, setAiLoading] = useState(false)
   const [aiResult, setAiResult] = useState<any>(null)
   const [aiError, setAiError] = useState<string | null>(null)
+  const [freeInput, setFreeInput] = useState('')
 
   // Sync filters → URL (preserve wizard & ai-plan params)
   useEffect(() => {
@@ -151,7 +157,7 @@ export default function HomeContent({ routes, posts }: HomeContentProps) {
       const res = await fetch('/api/generate-itinerary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(wizardAnswers),
+        body: JSON.stringify({ ...wizardAnswers, freeInput }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Generation failed')
@@ -161,6 +167,7 @@ export default function HomeContent({ routes, posts }: HomeContentProps) {
         id: `ai-${Date.now().toString(36)}`,
         title: json.title,
         description: json.description,
+        country: json.country,
         region: json.region,
         createdAt: new Date().toISOString(),
         aiData: json,
@@ -200,10 +207,16 @@ export default function HomeContent({ routes, posts }: HomeContentProps) {
       return true
     })
 
+    // Apply country filter
+    filtered = filtered.filter(({ route }) => {
+      if (filters.country && route.country !== filters.country) return false
+      return true
+    })
+
     return filtered
   }, [routes, matchResults, filters])
 
-  const hasFilters = filters.style !== null || filters.duration !== null
+  const hasFilters = filters.country !== null || filters.style !== null || filters.duration !== null
 
   // Split results into matched vs other (only meaningful when wizard is active)
   const scoredResults = matchResults ? displayResults.filter(r => r.score > 0) : []
@@ -225,29 +238,47 @@ export default function HomeContent({ routes, posts }: HomeContentProps) {
       {matchResults && wizardAnswers && (
         <div className="space-y-4">
           {!aiResult && (
-            <button
-              onClick={handleGenerateAI}
-              disabled={aiLoading}
-              className={`w-full py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
-                aiLoading
-                  ? 'bg-gray-100 text-gray-400 cursor-wait'
-                  : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0'
-              }`}
-            >
+            <div className="space-y-3">
               {aiLoading ? (
-                <>
-                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="32" strokeLinecap="round" className="opacity-30" />
-                    <path d="M12 2a10 10 0 019.95 9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-                  </svg>
-                  AI 正在为你规划路线...
-                </>
+                <ResearchProgress />
               ) : (
-                <>
-                  <span>🤖</span> AI 智能生成专属路线
-                </>
+                <div className="rounded-xl border border-gray-200 bg-white p-3">
+                  <label className="text-xs font-medium text-gray-500 mb-1.5 flex items-center gap-1">
+                    <span>📎</span> 参考内容（可选）：粘贴视频/帖子链接或文字攻略，AI 会融合优化
+                  </label>
+                  <textarea
+                    value={freeInput}
+                    onChange={e => setFreeInput(e.target.value)}
+                    placeholder="例如：小红书/抖音链接，或「想去布鲁尼岛吃生蚝、住摇篮山看袋熊」这类文字"
+                    rows={3}
+                    className="w-full resize-none rounded-lg border border-gray-200 p-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                  />
+                </div>
               )}
-            </button>
+              <button
+                onClick={handleGenerateAI}
+                disabled={aiLoading}
+                className={`w-full py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+                  aiLoading
+                    ? 'bg-gray-100 text-gray-400 cursor-wait'
+                    : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0'
+                }`}
+              >
+                {aiLoading ? (
+                  <>
+                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="32" strokeLinecap="round" className="opacity-30" />
+                      <path d="M12 2a10 10 0 019.95 9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                    </svg>
+                    AI 正在为你规划路线...
+                  </>
+                ) : (
+                  <>
+                    <span>🤖</span> AI 智能生成专属路线
+                  </>
+                )}
+              </button>
+            </div>
           )}
           {aiError && (
             <div className="py-3 px-4 bg-red-50 rounded-xl text-sm text-red-600 flex items-center gap-2">

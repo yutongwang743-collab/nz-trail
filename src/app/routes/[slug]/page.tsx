@@ -1,7 +1,10 @@
 import { notFound } from 'next/navigation'
 import { getRouteBySlug } from '@/lib/data'
+import { currencyForCountry } from '@/lib/types'
 import MapTimeline from '@/components/MapTimeline'
 import BudgetBreakdown from '@/components/BudgetBreakdown'
+import BookingLinks from '@/components/BookingLinks'
+import FoodStaySummary from '@/components/FoodStaySummary'
 import VariantSelector from '@/components/VariantSelector'
 import ExpandablePostCard from '@/components/ExpandablePostCard'
 import SaveButtonWrapper from '@/components/SaveButtonWrapper'
@@ -43,7 +46,7 @@ export default async function RoutePage({ params, searchParams }: RoutePageProps
 
       <div className="mb-6">
         <div className="flex flex-wrap items-center gap-1.5 mb-2">
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{route.region}</span>
+          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{route.country} · {route.region}</span>
           {(route.typeTags as string[]).map((tag: string) => (
             <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-brand-50 text-brand-600">{tag}</span>
           ))}
@@ -59,6 +62,7 @@ export default async function RoutePage({ params, searchParams }: RoutePageProps
                 type: 'route',
                 title: route.title,
                 description: route.description,
+                country: route.country,
                 region: route.region,
                 routeId: route.id,
                 routeSlug: route.slug,
@@ -112,7 +116,16 @@ export default async function RoutePage({ params, searchParams }: RoutePageProps
           itinerary={activeVariant.itinerary}
           totalMin={activeVariant.totalBudgetMin}
           totalMax={activeVariant.totalBudgetMax}
+          currency={currencyForCountry(route.country)}
         />
+      </div>
+
+      <div className="mt-8">
+        <BookingLinks country={route.country} region={route.region} />
+      </div>
+
+      <div className="mt-8">
+        <FoodStaySummary days={activeVariant.itinerary} />
       </div>
 
       {route.posts && route.posts.length > 0 && (
