@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getPostById } from '@/lib/data'
+import { sourceMeta } from '@/lib/sourceMeta'
 
 interface PostPageProps {
   params: { slug: string }
@@ -40,7 +41,7 @@ export default async function PostPage({ params }: PostPageProps) {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-lg font-semibold text-gray-900">{post.authorName}</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-rose-100 text-rose-600 font-medium">小红书博主</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-rose-100 text-rose-600 font-medium">{sourceMeta(post.sourcePlatform).icon} {sourceMeta(post.sourcePlatform).label}博主</span>
             </div>
             <div className="text-sm text-gray-500">
               {post.sourcePlatform} · {new Date(post.sourcePublishedAt).toLocaleDateString('zh-CN')} 发布
@@ -72,7 +73,7 @@ export default async function PostPage({ params }: PostPageProps) {
       </a>
 
       <div className="card p-4 mb-6 border-brand-100 bg-brand-50/30">
-        <h2 className="font-semibold text-gray-900 mb-3">🤖 AI 路线要点提取</h2>
+        <h2 className="font-semibold text-gray-900 mb-3">🤖 AI 摘要（自动提取）</h2>
         <div className="space-y-2 text-sm">
           {summary.locations?.length > 0 && (
             <div className="flex gap-2">

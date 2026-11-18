@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { sourceMeta } from '@/lib/sourceMeta'
 
 interface PostData {
   id: number
@@ -44,7 +45,9 @@ export default function ExpandablePostCard({ post }: ExpandablePostCardProps) {
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-sm font-medium text-gray-700 truncate">{post.authorName}</span>
-            <span className="text-xs text-gray-400">{post.sourcePlatform}</span>
+            <span className="text-xs px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap">
+              {sourceMeta(post.sourcePlatform).icon} {sourceMeta(post.sourcePlatform).label}
+            </span>
           </div>
           <h4 className="font-medium text-gray-900 text-sm line-clamp-2 mb-2">{post.title}</h4>
           <div className="flex items-center gap-3 text-xs text-gray-400">
@@ -70,7 +73,7 @@ export default function ExpandablePostCard({ post }: ExpandablePostCardProps) {
             style={{ background: 'linear-gradient(135deg, #ff5a5f, #e51d1d)' }}
           >
             <div>
-              <div className="text-xs font-bold">📕 在小红书查看 @{post.authorName} 的原帖</div>
+              <div className="text-xs font-bold">{sourceMeta(post.sourcePlatform).icon} 在{sourceMeta(post.sourcePlatform).label}查看 @{post.authorName} 的原帖</div>
               <div className="text-white/70 text-[10px] mt-0.5">跳转查看完整图文和评论</div>
             </div>
             <span className="text-sm">→</span>
