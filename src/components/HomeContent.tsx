@@ -8,6 +8,7 @@ import RouteCard from './RouteCard'
 import DiscoveryWizard from './DiscoveryWizard'
 import AIGeneratedResult from './AIGeneratedResult'
 import ResearchProgress from './ResearchProgress'
+import SubmitPostCard from './SubmitPostCard'
 import { matchRoutes, type MatchResult } from '@/lib/matchRoutes'
 import type { RouteWithVariants, FilterState, WizardAnswers, TravelStyle } from '@/lib/types'
 import { DURATION_OPTIONS } from '@/lib/types'
@@ -244,7 +245,7 @@ export default function HomeContent({ routes, posts }: HomeContentProps) {
               ) : (
                 <div className="rounded-xl border border-gray-200 bg-white p-3">
                   <label className="text-xs font-medium text-gray-500 mb-1.5 flex items-center gap-1">
-                    <span>📎</span> 参考内容（可选）：粘贴视频/帖子链接或文字攻略，AI 会融合优化
+                    <span>💬</span> 补充你的旅行需求（可选）：用一句话描述，或粘贴链接/攻略
                   </label>
                   <textarea
                     value={freeInput}
@@ -293,6 +294,8 @@ export default function HomeContent({ routes, posts }: HomeContentProps) {
       )}
 
       <FilterBar filters={filters} onChange={setFilters} />
+
+      <SubmitPostCard />
 
       {/* 小红书热门帖子 — only when no filters and no wizard results */}
       {!hasFilters && !matchResults && posts.length > 0 && (

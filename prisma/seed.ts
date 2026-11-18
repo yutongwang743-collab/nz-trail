@@ -1159,6 +1159,16 @@ async function main() {
     ]
   })
 
+  // 清理「无原帖」的帖子（搜索/聚合链接，非真实原帖）
+  await prisma.post.deleteMany({
+    where: {
+      OR: [
+        { sourceUrl: { contains: 'search_result' } },
+        { sourceUrl: { contains: 'keyword=' } },
+      ],
+    },
+  })
+
   const insightCount = await rebuildInsights(prisma)
 
   console.log(`Seed complete: destinations, routes, variants, posts + ${insightCount} insights (新西兰 + 塔斯马尼亚)`)

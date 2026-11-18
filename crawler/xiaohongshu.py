@@ -92,10 +92,10 @@ async def login_and_save():
         )
         page = await context.new_page()
         await page.goto("https://www.xiaohongshu.com", wait_until="domcontentloaded")
-        print("\n请在浏览器中完成登录...")
-        print("登录后回到终端按 Enter")
+        print("\n请在浏览器中完成登录（约 3 分钟内）...")
+        print("登录完成后会自动保存 cookie，无需操作终端")
 
-        input()
+        await asyncio.sleep(180)
         await asyncio.sleep(1)
 
         # 保存登录状态

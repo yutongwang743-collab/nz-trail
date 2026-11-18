@@ -1,13 +1,12 @@
-"""AI 结构化提取管线：用 Claude API 从帖子内容中提取路线结构化信息。"""
+"""AI 结构化提取管线：用 DeepSeek 从帖子内容中提取路线结构化信息。"""
 
 import json
 import os
 import time
-from dataclasses import dataclass, asdict
+import urllib.request
+import urllib.error
+from dataclasses import dataclass
 from typing import Optional
-
-from anthropic import Anthropic
-
 
 SYSTEM_PROMPT = """你是一个旅行路线分析助手。你的任务是从社交媒体帖子内容中提取结构化的旅行信息（国家/地点、活动、时长、预算、季节、交通、关键提示）。
 
@@ -20,8 +19,7 @@ SYSTEM_PROMPT = """你是一个旅行路线分析助手。你的任务是从社�
   "budget": "string",
   "season": "string",
   "transport": "string",
-  "key_tips": ["提示1", "提示2"],
-  "route_type": ["标签1", "标签2"]
+  "keyTips": ["提示1", "提示2"]
 }
 
 如果某个字段无法从帖子中提取，使用 "unknown" 或空数组。只返回 JSON，不要有其他内容。"""
@@ -41,20 +39,44 @@ class ProcessedPost:
     source_published_at: str
 
 
-def process_single_post(client: Anthropic, post) -> Optional[dict]:
+def _get_deepseek_key() -> Optional[str]:
+    # 优先环境变量，其次尝试从 ../.env.local 读取（本地开发）
+    key = os.environ.get("DEEPSEEK_API_KEY")
+    if key:
+        return key
+    env_path = os.path.join(os.path.dirname(__file__), "..", ".env.local")
+    if os.path.exists(env_path):
+        with open(env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("DEEPSEEK_API_KEY="):
+                    val = line.split("=", 1)[1].strip().strip('"').strip("'")
+                    return val or None
+    return None
+
+
+def process_single_post(post) -> Optional[dict]:
+    api_key = _get_deepseek_key()
+    if not api_key:
+        return None
     try:
-        message = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=1024,
-            temperature=0,
-            system=SYSTEM_PROMPT,
-            messages=[{
-                "role": "user",
-                "content": f"帖子标题: {post.title}\n\n帖子内容:\n{post.raw_content[:3000]}"
-            }]
+        payload = json.dumps({
+            "model": "deepseek-chat",
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": f"帖子标题: {post.title}\n\n帖子内容:\n{post.raw_content[:3000]}"},
+            ],
+            "temperature": 0,
+            "max_tokens": 1024,
+        }).encode("utf-8")
+        req = urllib.request.Request(
+            "https://api.deepseek.com/v1/chat/completions",
+            data=payload,
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
         )
-        text = message.content[0].text
-        text = text.strip()
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        text = data["choices"][0]["message"]["content"].strip()
         if text.startswith("```"):
             text = text.split("\n", 1)[1]
             if text.endswith("```"):
@@ -66,24 +88,21 @@ def process_single_post(client: Anthropic, post) -> Optional[dict]:
 
 
 def process_posts(posts: list, batch_size: int = 5, delay: float = 1.0) -> list[ProcessedPost]:
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        print("警告: ANTHROPIC_API_KEY 未设置，跳过 AI 处理")
+    if not _get_deepseek_key():
+        print("警告: DEEPSEEK_API_KEY 未设置，跳过 AI 处理")
         return []
 
-    client = Anthropic(api_key=api_key)
     results: list[ProcessedPost] = []
-
     for i, post in enumerate(posts):
         print(f"  处理 [{i+1}/{len(posts)}]: {post.title[:50]}...")
-        ai_summary = process_single_post(client, post)
+        ai_summary = process_single_post(post)
         if ai_summary is None:
             ai_summary = {
                 "locations": [], "activities": [], "duration": "unknown",
                 "budget": "unknown", "season": "unknown", "transport": "unknown",
-                "key_tips": [], "route_type": []
+                "keyTips": [],
             }
-        processed = ProcessedPost(
+        results.append(ProcessedPost(
             source_platform=post.source_platform,
             source_url=post.source_url,
             author_name=post.author_name,
@@ -94,8 +113,7 @@ def process_posts(posts: list, batch_size: int = 5, delay: float = 1.0) -> list[
             saves=post.saves,
             comments=post.comments,
             source_published_at=post.source_published_at,
-        )
-        results.append(processed)
+        ))
         time.sleep(delay)
     return results
 

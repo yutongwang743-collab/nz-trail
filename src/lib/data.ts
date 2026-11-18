@@ -1,5 +1,6 @@
 import { prisma } from './prisma'
 import { type RouteWithVariants, type ItineraryDay } from './types'
+import { isRealPostUrl } from './postSource'
 
 // ── Destination highlight data ──
 
@@ -213,7 +214,7 @@ export async function getRouteBySlug(slug: string) {
     bestSeason: JSON.parse(r.bestSeason),
     typeTags: JSON.parse(r.typeTags),
     variants: r.variants.map(v => ({ ...v, itinerary: enrichItinerary(JSON.parse(v.itinerary)) })),
-    posts: r.posts.map(p => ({ ...p, aiSummary: JSON.parse(p.aiSummary) })),
+    posts: r.posts.filter(p => isRealPostUrl(p.sourceUrl)).map(p => ({ ...p, aiSummary: JSON.parse(p.aiSummary) })),
   }
 }
 
@@ -224,7 +225,7 @@ export async function getRecentPosts(limit = 6) {
     take: limit,
     include: { route: { select: { title: true, slug: true } } },
   })
-  return posts.map(p => ({
+  return posts.filter(p => isRealPostUrl(p.sourceUrl)).map(p => ({
     ...p,
     aiSummary: JSON.parse(p.aiSummary),
     screenshots: JSON.parse(p.screenshots),
@@ -275,6 +276,7 @@ export async function getDestinationBySlug(slug: string) {
   })
 
   const filteredPosts = relatedPosts.filter(p => {
+    if (!isRealPostUrl(p.sourceUrl)) return false
     const summary = JSON.parse(p.aiSummary)
     return summary.locations?.some((loc: string) =>
       loc.includes(dest.name) || dest.name.includes(loc)

@@ -40,6 +40,13 @@ META_AU = [
     "澳洲 必去 景点",
 ]
 
+# ── 抖音 ──
+DOUYIN_AU = [
+    "塔斯马尼亚旅游", "塔斯马尼亚攻略", "霍巴特", "摇篮山", "布鲁尼岛",
+    "悉尼旅行", "墨尔本旅行", "大堡礁", "黄金海岸", "澳洲自驾",
+    "澳洲美食", "澳洲海滩",
+]
+
 # ── 综合爬虫（穷游网 / Wikivoyage / 猫途鹰）──
 MULTI_AU_URLS = {
     "qyer": [
@@ -68,6 +75,7 @@ _AU_PLATFORM_KEYWORDS = {
     "xiaohongshu": XIAOHONGSHU_AU,
     "mafengwo": MAFENGWO_AU,
     "meta": META_AU,
+    "douyin": DOUYIN_AU,
 }
 
 
