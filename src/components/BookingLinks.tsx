@@ -1,6 +1,6 @@
 // ── 联盟/佣金参数占位（申请后填入即可生效）──
 // Booking.com Affiliate (AAPP)：填 aid，用户下单自动记佣金
-const BOOKING_AID = '' // 例：'1234567'
+const BOOKING_AID = '8130780'
 // Agoda affiliate：填 cid
 const AGODA_CID = '' // 例：'1234567'
 
