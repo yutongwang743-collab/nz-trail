@@ -23,6 +23,9 @@ export default async function RoutePage({ params, searchParams }: RoutePageProps
   const variantId = searchParams.variant ? parseInt(searchParams.variant) : route.variants[0]?.id
   const activeVariant = route.variants.find(v => v.id === variantId) || route.variants[0]
 
+  const durationOptions = [...new Set(route.variants.map(v => v.duration))]
+  const budgetLevels = [...new Set(route.variants.map(v => v.budgetLevel))]
+
   const destinationCoords = route.destinations.map(d => {
     const [lat, lng] = d.destination.coordinates.split(',').map(Number)
     return {
@@ -103,6 +106,28 @@ export default async function RoutePage({ params, searchParams }: RoutePageProps
         </div>
       )}
 
+      {/* 概览 */}
+      <div className="mb-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="card p-3">
+          <div className="text-xs text-gray-400">📅 天数</div>
+          <div className="text-sm font-semibold text-gray-900 mt-0.5">{durationOptions.join(' / ')}</div>
+        </div>
+        <div className="card p-3">
+          <div className="text-xs text-gray-400">💰 预算</div>
+          <div className="text-sm font-semibold text-gray-900 mt-0.5">{budgetLevels.join(' / ')}</div>
+          <div className="text-xs text-gray-500">{currencyForCountry(route.country)} {activeVariant.totalBudgetMin}-{activeVariant.totalBudgetMax}</div>
+        </div>
+        <div className="card p-3">
+          <div className="text-xs text-gray-400">🗺️ 目的地</div>
+          <div className="text-sm font-semibold text-gray-900 mt-0.5">{route.destinations.length} 站</div>
+        </div>
+        <div className="card p-3">
+          <div className="text-xs text-gray-400">🚗 类型</div>
+          <div className="text-sm font-semibold text-gray-900 mt-0.5">{(route.typeTags as string[]).slice(0, 2).join(' · ')}</div>
+        </div>
+      </div>
+
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">🗺️ 地图与每日行程</h2>
       <MapTimeline
         itinerary={activeVariant.itinerary}
         destinationCoords={destinationCoords}
@@ -120,6 +145,7 @@ export default async function RoutePage({ params, searchParams }: RoutePageProps
       />
 
       <div className="mt-8">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">💰 预算明细</h2>
         <BudgetBreakdown
           itinerary={activeVariant.itinerary}
           totalMin={activeVariant.totalBudgetMin}
@@ -129,14 +155,16 @@ export default async function RoutePage({ params, searchParams }: RoutePageProps
       </div>
 
       <div className="mt-8">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">✈️ 订票与比价</h2>
         <BookingLinks country={route.country} region={route.region} />
       </div>
 
-      <div className="mt-8">
+      <div className="mt-4">
         <FlightPriceCompare defaultDestination={destAirport} />
       </div>
 
       <div className="mt-8">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">🍽️ 餐厅与住宿</h2>
         <FoodStaySummary days={activeVariant.itinerary} />
       </div>
 
