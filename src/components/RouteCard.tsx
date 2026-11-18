@@ -77,7 +77,7 @@ export default function RouteCard({ route, matchScore, maxScore, perPersonBudget
           <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/25 backdrop-blur-sm text-white">
             {route.country} · {route.region}
           </span>
-          {route.typeTags.slice(0, 1).map(tag => (
+          {route.typeTags.slice(0, 2).map(tag => (
             <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-white/90">
               {tag}
             </span>
@@ -106,13 +106,14 @@ export default function RouteCard({ route, matchScore, maxScore, perPersonBudget
             <ResultBadge score={matchScore} maxScore={maxScore ?? 0} perPersonBudget={perPersonBudget} currency={currencyForCountry(route.country)} />
           </div>
         )}
-        <div className="flex items-center gap-1 text-xs text-gray-400 overflow-x-auto">
-          {sortedDests.slice(0, 4).map((d, i) => (
+        <div className="flex items-center gap-1 text-xs text-gray-400 overflow-hidden">
+          {sortedDests.slice(0, 3).map((d, i) => (
             <span key={d.destination.id} className="whitespace-nowrap">
               {d.destination.name}
-              {i < Math.min(sortedDests.length, 4) - 1 ? ' →' : ''}
+              {i < Math.min(sortedDests.length, 3) - 1 ? ' →' : ''}
             </span>
           ))}
+          {sortedDests.length > 3 && <span className="text-gray-300">…</span>}
         </div>
       </div>
     </Link>
