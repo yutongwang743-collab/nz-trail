@@ -163,13 +163,14 @@ export default function HomeContent({ routes, posts }: HomeContentProps) {
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Generation failed')
       setAiResult(json)
-      // Auto-save to AI history
+      // Auto-save to AI history（从第一个方案取标题等信息）
+      const firstPlan = json.plans?.[0] || {}
       addAIHistory({
         id: `ai-${Date.now().toString(36)}`,
-        title: json.title,
-        description: json.description,
-        country: json.country,
-        region: json.region,
+        title: firstPlan.title || 'AI 旅行方案',
+        description: firstPlan.description || '',
+        country: firstPlan.country,
+        region: firstPlan.region,
         createdAt: new Date().toISOString(),
         aiData: json,
       })
