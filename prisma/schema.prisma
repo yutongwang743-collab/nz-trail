@@ -103,14 +103,3 @@ model ExtractedInsight {
 
   @@unique([destination, content])
 }
-
-// 价格快照（外部 API 查询结果，带来源与时间戳）
-model PriceRecord {
-  id        Int      @id @default(autoincrement())
-  itemType  String   // "flight" | "hotel" | "activity"
-  itemName  String   // 如 "SYD→HBA" / "Hobart"
-  source    String   // "amadeus" | "ai_estimate"
-  price     Float
-  currency  String   @default("AUD")
-  fetchedAt DateTime @default(now())
-}
