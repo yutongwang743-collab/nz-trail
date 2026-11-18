@@ -4,6 +4,7 @@ import { currencyForCountry } from '@/lib/types'
 import MapTimeline from '@/components/MapTimeline'
 import BudgetBreakdown from '@/components/BudgetBreakdown'
 import BookingLinks from '@/components/BookingLinks'
+import FlightPriceCompare from '@/components/FlightPriceCompare'
 import FoodStaySummary from '@/components/FoodStaySummary'
 import VariantSelector from '@/components/VariantSelector'
 import ExpandablePostCard from '@/components/ExpandablePostCard'
@@ -34,6 +35,13 @@ export default async function RoutePage({ params, searchParams }: RoutePageProps
   })
 
   const xhsSearchUrl = `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(route.title)}&type=51`
+
+  const REGION_AIRPORT: Record<string, string> = {
+    '塔斯马尼亚': 'HBA',
+    '南岛': 'ZQN',
+    '北岛': 'AKL',
+  }
+  const destAirport = REGION_AIRPORT[route.region] || 'HBA'
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -122,6 +130,10 @@ export default async function RoutePage({ params, searchParams }: RoutePageProps
 
       <div className="mt-8">
         <BookingLinks country={route.country} region={route.region} />
+      </div>
+
+      <div className="mt-8">
+        <FlightPriceCompare defaultDestination={destAirport} />
       </div>
 
       <div className="mt-8">
