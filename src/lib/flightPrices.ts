@@ -29,6 +29,7 @@ export async function searchSerpApiFlights(p: FlightSearchParams): Promise<Fligh
       outbound_date: p.date,
       adults: String(p.adults || 1),
       currency: 'AUD',
+      type: '2', // 单程（否则默认往返会要求 return_date）
       api_key: key,
     })
     const res = await fetch(`https://serpapi.com/search.json?${qs}`)
